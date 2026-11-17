@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Same data. Two prompts. One client tomorrow.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAF9F6;
+  --surface: #FFFFFF;
+  --surface-2: #F1F1ED;
+  --ink: #172A3A;
+  --muted: #5E6E7B;
+  --line: #E2E2DC;
+  --accent: #4F46E5;
+  --accent-2: #4338CA;
+  --accent-soft: #EEF2FF;
+  --warn: #B45309;
+  --warn-bg: #FFFBEB;
+  --warn-border: #F59E0B;
+  --warn-dark: #78350F;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Public Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.page-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+h1, h2, h3, .fraunces { font-family: 'Fraunces', serif; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 48px; opacity: 0; }
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(32px, 5vw, 54px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+.page-subtitle {
+  font-size: 21px;
+  color: var(--muted);
+  max-width: 700px;
+  line-height: 1.55;
+}
+
+/* CONTEXT BAR */
+.context-bar {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px 24px;
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 36px;
+  opacity: 0;
+}
+.context-bar strong { color: var(--ink); }
+
+/* TIMER ROW */
+.timer-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+  opacity: 0;
+}
+.timer-display {
+  font-family: 'Fraunces', serif;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 110px;
+  transition: color 0.3s;
+}
+.timer-display.urgent { color: #DC2626; }
+.timer-btn {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.timer-btn:hover { background: var(--surface-2); border-color: var(--accent); }
+.timer-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.timer-btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+.timer-btn.secondary { color: var(--muted); }
+
+/* SCENARIO CARD */
+.scenario-card {
+  background: var(--ink);
+  border-radius: 16px;
+  padding: 36px 40px;
+  margin-bottom: 36px;
+  opacity: 0;
+}
+.scenario-card .eyebrow { color: rgba(255,255,255,0.5); }
+.scenario-card p { color: rgba(255,255,255,0.9); font-size: 16px; line-height: 1.7; margin-top: 14px; }
+.scenario-card .hint { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
+
+/* SPLIT VIEW */
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 48px;
+  opacity: 0;
+}
+@media (max-width: 700px) {
+  .split-view { grid-template-columns: 1fr; }
+}
+.prompt-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.3s;
+}
+.prompt-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.prompt-card-header .eyebrow { margin: 0; }
+.basis-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.prompt-card-body { padding: 20px; flex: 1; }
+.prompt-card-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+/* Signal rows */
+.signal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.signal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.signal-row.top { background: var(--accent-soft); border-color: rgba(79,70,229,0.2); }
+.signal-score {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 36px;
+}
+.signal-row.top .signal-score { color: var(--accent); }
+.signal-info { flex: 1; }
+.signal-label { font-size: 13px; font-weight: 700; color: var(--ink); }
+.signal-desc { font-size: 12px; color: var(--muted); }
+.rank-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.signal-row.top .rank-badge { color: var(--accent); border-color: rgba(79,70,229,0.3); background: white; }
+
+.prompt-code-box {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 0;
+  font-style: italic;
+}
+
+.prompt-card-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--line);
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.prompt-card-footer strong { color: var(--warn); }
+
+/* Framed prompt card */
+.framed-card-inner { padding: 20px; flex: 1; position: relative; }
+.framed-blockquote {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.6;
+  border-left: 4px solid var(--accent);
+  padding-left: 16px;
+  margin-bottom: 16px;
+}
+.framed-note {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.framed-footer {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 14px;
+}
+
+/* LOCK OVERLAY */
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(23,42,58,0.82);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-radius: 0;
+  z-index: 10;
+  padding: 20px;
+}
+.lock-icon-circle {
+  width: 56px; height: 56px;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.lock-overlay-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+.lock-overlay-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  max-width: 220px;
+  line-height: 1.5;
+}
+.btn-reveal {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #fff;
+  font-family: 'Public Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #92400E;
+  transition: transform 0.1s, box-shadow 0.1s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-reveal:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #92400E; }
+.btn-reveal:active { transform: translateY(2px); box-shadow: 0 2px 0 #92400E; }
+
+/* PROMPT QUALITY BANNER */
+.quality-banner {
+  background: var(--accent-soft);
+  border: 1px solid rgba(79,70,229,0.2);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-top: 48px;
+  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  opacity: 0;
+}
+.banner-left { flex: 1; min-width: 240px; }
+.banner-left .eyebrow {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--accent);
+}
+.banner-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 8px 0 8px;
+}
+.banner-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.banner-pill {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 12px;
+  padding: 18px 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.banner-pill-label { font-size: 11px; font-weight: 600; opacity: 0.7; letter-spacing: 0.08em; text-transform: uppercase; }
+.banner-pill-value {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 700;
+  display: block;
+  line-height: 1;
+  margin: 4px 0;
+}
+.banner-pill-note { font-size: 12px; opacity: 0.7; }
+
+/* CLUE GRID */
+.clue-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+  opacity: 0;
+}
+@media (max-width: 700px) { .clue-grid { grid-template-columns: 1fr; } }
+.clue-card {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.clue-locked, .clue-revealed { padding: 20px; }
+.clue-revealed { display: none; }
+.clue-cat-icon {
+  width: 40px; height: 40px;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.clue-hint {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.clue-cost-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warn);
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  margin-bottom: 14px;
+}
+.btn-unlock {
+  width: 100%;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #fff;
+  font-family: 'Public Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #92400E;
+  transition: transform 0.1s, box-shadow 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-unlock:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #92400E; }
+.btn-unlock:active { transform: translateY(2px); box-shadow: 0 2px 0 #92400E; }
+.clue-revealed-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.clue-finding {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.clue-unlocked-badge {
+  display: none;
+  font-size: 11px;
+  font-weight: 700;
+  color: #DC2626;
+  margin-top: 10px;
+}
+
+/* STEP SECTIONS */
+.step-section {
+  display: none;
+  margin-bottom: 36px;
+  opacity: 0;
+}
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.step-badge {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.step-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.step-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+
+/* Choice buttons */
+.choices { display: flex; flex-direction: column; gap: 12px; }
+.choice-btn {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  font-family: 'Public Sans', sans-serif;
+  opacity: 0;
+  transform: translateY(20px);
+}
+.choice-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.choice-btn.selected { border-color: var(--accent); background: var(--accent-soft); }
+.choice-btn.wrong { border-color: #EF4444; background: #FEF2F2; }
+.choice-btn.correct { border-color: #10B981; background: #ECFDF5; }
+.choice-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.choice-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* Feedback box */
+.feedback-box {
+  display: none;
+  margin-top: 16px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.feedback-box.correct-fb { background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; }
+.feedback-box.wrong-fb { background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; }
+.reconsider-nudge {
+  display: none;
+  font-size: 13px;
+  color: var(--warn);
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+/* SCORE TRACKER */
+.score-tracker {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 36px;
+  opacity: 0;
+}
+.tracker-inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.tracker-score-block { display: flex; align-items: baseline; gap: 4px; }
+.tracker-score-num {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.tracker-score-denom { font-size: 16px; color: var(--muted); font-weight: 600; }
+.tracker-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.tracker-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.tracker-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  transition: background 0.3s, color 0.3s;
+  flex-shrink: 0;
+}
+.tracker-dot.active { background: var(--accent); color: #fff; animation: pulse-dot 1.5s infinite; }
+.tracker-dot.done { background: var(--accent); color: #fff; }
+@keyframes pulse-dot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(79,70,229,0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(79,70,229,0); }
+}
+.tracker-line {
+  width: 32px; height: 2px;
+  background: var(--line);
+  transition: background 0.5s;
+  flex-shrink: 0;
+}
+.tracker-line.done { background: var(--accent); }
+.tracker-pts-label { font-size: 11px; color: var(--accent); font-weight: 700; }
+
+/* SCORECARD */
+.scorecard {
+  display: none;
+  background: var(--ink);
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 24px;
+  opacity: 0;
+}
+.scorecard-eyebrow { color: rgba(255,255,255,0.5); margin-bottom: 10px; }
+.scorecard-score-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.score-num-big {
+  font-family: 'Fraunces', serif;
+  font-size: 72px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.score-denom-big { font-size: 28px; color: rgba(255,255,255,0.4); font-weight: 600; padding-bottom: 8px; }
+.score-progress-bar-bg {
+  background: rgba(255,255,255,0.1);
+  border-radius: 100px;
+  height: 8px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.score-progress-bar { height: 100%; background: var(--accent); border-radius: 100px; width: 0%; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+.score-tier {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.score-tier-desc { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.6; margin-bottom: 28px; }
+.score-breakdown { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 14px;
+  color: rgba(255,255,255,0.75);
+}
+.breakdown-row:last-child { border-bottom: none; }
+.breakdown-pts {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+.breakdown-pts.negative { color: #FCA5A5; }
+.breakdown-row.total-row {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 14px;
+  font-weight: 700;
+  color: #fff;
+  font-size: 15px;
+}
+.takeaway-box {
+  background: var(--accent-soft);
+  border: 1px solid rgba(79,70,229,0.25);
+  border-radius: 10px;
+  padding: 18px 20px;
+  font-size: 14px;
+  color: var(--accent-2);
+  line-height: 1.65;
+  margin-top: 24px;
+}
+
+/* COST REVEAL PANEL */
+.cost-panel {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 36px 40px;
+  margin-bottom: 48px;
+  opacity: 0;
+}
+.cost-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) { .cost-cols { grid-template-columns: 1fr; } }
+.cost-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.cost-col-value {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.cost-col-value.indigo { color: var(--accent); }
+.cost-col-value.red { color: #DC2626; }
+.cost-col-note { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.cost-insight {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* Spinning icon */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; display: inline-block; }
+
+/* Particles */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 16px;
+  z-index: 9999;
+  line-height: 1;
+}
+.pts-badge {
+  position: fixed;
+  pointer-events: none;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 15px;
+  z-index: 9999;
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .page-wrap { padding: 32px 20px; }
+  .page-subtitle { font-size: 17px; }
+  .scenario-card { padding: 24px 20px; }
+  .quality-banner { flex-direction: column; }
+  .scorecard { padding: 28px 20px; }
+  .cost-panel { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- SECTION 1: PAGE HEADER -->
+  <header class="page-header" id="pageHeader">
+    <div class="eyebrow">WARM-UP · 3 MINUTES · AI FOR VIBE CODING</div>
+    <h1 class="page-title">Same data. Two prompts.<br>One client tomorrow.</h1>
+    <p class="page-subtitle">Two colleagues built a client dashboard from the same Excel file using the same AI tool. One spent 5 minutes framing first. Only one result is ready to send. You have 3 minutes to work out why.</p>
+  </header>
+
+  <!-- SECTION 2: CONTEXT BAR -->
+  <div class="context-bar" id="contextBar">
+    You are reviewing two AI-generated QBR dashboards before tomorrow morning's client meeting with <strong>Meridian Healthcare</strong> — a <strong>$1.8M account</strong>. Both were built today, from the same Excel file, using the same AI tool. Colleague A spent 2 minutes on the prompt. Colleague B spent 5 minutes framing the problem first, then wrote a structured prompt. The dashboards are on your screen. Only one goes to the client.
+  </div>
+
+  <!-- SECTION 3: TIMER ROW -->
+  <div class="timer-row" id="timerRow">
+    <div class="timer-display" id="timerDisplay">3:00</div>
+    <button class="timer-btn primary" id="timerStartBtn" onclick="timerToggle()">Start</button>
+    <button class="timer-btn" onclick="timerReset()">Reset timer</button>
+    <button class="timer-btn secondary" id="resetActivityBtn" onclick="resetActivity()">Reset Activity</button>
+  </div>
+
+  <!-- SECTION 4: SCENARIO CARD -->
+  <div class="scenario-card" id="scenarioCard">
+    <div class="eyebrow">QBR DASHBOARD REVIEW · MERIDIAN HEALTHCARE</div>
+    <p>Two dashboards. Same data file: <strong>meridian_q4_data.xlsx</strong>. Same AI tool. Different prompts. Colleague A typed: <em>"Make me a dashboard from this Excel file."</em> Colleague B spent 5 minutes reading the data, decided what story the numbers told, and wrote a structured prompt with a named audience, a specific decision, and a described layout before firing. The meeting is at 9am. Your head of sales wants a preview by 8. Which dashboard are you forwarding?</p>
+    <p class="hint">Review what the quick prompt produced on the left. The framed prompt result is locked — reveal it when you are ready to compare.</p>
+  </div>
+
+  <!-- SECTION 5: SPLIT VIEW -->
+  <div class="split-view" id="splitView">
+
+    <!-- LEFT: QUICK PROMPT -->
+    <div class="prompt-card" id="quickCard">
+      <div class="prompt-card-header">
+        <div class="eyebrow">QUICK PROMPT</div>
+        <span class="basis-badge">Prompt: 8 words</span>
+      </div>
+      <div class="prompt-card-body">
+        <div class="prompt-card-title">What the AI produced</div>
+        <div class="signal-list">
+          <div class="signal-row top">
+            <div class="signal-score">41</div>
+            <div class="signal-info">
+              <div class="signal-label">Data accuracy</div>
+              <div class="signal-desc">"3 of 7 figures from previous quarter"</div>
+            </div>
+            <div class="rank-badge">#1</div>
+          </div>
+          <div class="signal-row">
+            <div class="signal-score">28</div>
+            <div class="signal-info">
+              <div class="signal-label">Audience clarity</div>
+              <div class="signal-desc">"No named audience or decision"</div>
+            </div>
+            <div class="rank-badge">#2</div>
+          </div>
+          <div class="signal-row">
+            <div class="signal-score">22</div>
+            <div class="signal-info">
+              <div class="signal-label">Visual hierarchy</div>
+              <div class="signal-desc">"Generic title, no client branding"</div>
+            </div>
+            <div class="rank-badge">#3</div>
+          </div>
+          <div class="signal-row">
+            <div class="signal-score">15</div>
+            <div class="signal-info">
+              <div class="signal-label">Actionability</div>
+              <div class="signal-desc">"Data shown, no story told"</div>
+            </div>
+            <div class="rank-badge">#4</div>
+          </div>
+        </div>
+        <div class="prompt-code-box">"Make me a dashboard from this Excel file."</div>
+      </div>
+      <div class="prompt-card-footer">
+        <strong>Top issue: Data accuracy</strong><br>
+        3 of 7 figures do not match the source file. The AI interpolated from column headers rather than reading actual cell values.
+      </div>
+    </div>
+
+    <!-- RIGHT: FRAMED PROMPT -->
+    <div class="prompt-card" id="framedCard" style="position:relative;">
+      <div class="prompt-card-header">
+        <div class="eyebrow">FRAMED PROMPT</div>
+        <span class="basis-badge">Prompt: structured · 5-area scaffold</span>
+      </div>
+      <div class="framed-card-inner" style="position:relative; flex:1; display:flex; flex-direction:column;">
+        <div class="prompt-card-title">What framing produced</div>
+        <blockquote class="framed-blockquote">"The dashboard opened with the revenue variance, highlighted Nexus Dynamics as the at-risk renewal, and gave the leadership team a single number to walk into the room with. The figures matched the file exactly. It took 20 minutes to build and zero minutes to explain."</blockquote>
+        <div class="framed-note">The structured prompt named the audience (QBR leadership team), described the decision (whether to escalate Nexus Dynamics before year-end), and specified three sections before the AI wrote a single line of code. The AI read the file — it did not guess.</div>
+        <p class="framed-footer">The prompts were different lengths. The thinking behind them was the real difference.</p>
+
+        <!-- LOCK OVERLAY -->
+        <div class="lock-overlay" id="lockOverlay">
+          <div class="lock-icon-circle" id="lockIconCircle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div class="lock-overlay-title">Framed prompt result</div>
+          <div class="lock-overlay-desc">See what 5 minutes of framing before the prompt actually produced.</div>
+          <button class="btn-reveal" id="revealBtn" onclick="unlockFramedPromptManual(this)">
+            <span>&#9733;</span> Reveal the result
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- end split-view -->
+
+  <!-- SECTION 6: PROMPT QUALITY BANNER -->
+  <div class="quality-banner" id="qualityBanner">
+    <div class="banner-left">
+      <div class="eyebrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>
+        AI-POWERED · REAL COST
+      </div>
+      <div class="banner-title">Want AI to check the output for you?</div>
+      <div class="banner-desc">Each question below asks the AI to audit a specific quality dimension — the model runs, tokens are consumed. The cost is tiny but real. Great builders check their own output first. Total shown at the end.</div>
+    </div>
+    <div class="banner-pill">
+      <div class="banner-pill-label">Per check</div>
+      <span class="banner-pill-value">~$0.001</span>
+      <div class="banner-pill-note">−5 pts each</div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: CLUE GRID -->
+  <div class="clue-grid" id="clueGrid">
+
+    <!-- CLUE 1 -->
+    <div class="clue-card" id="clueCard0">
+      <div class="clue-locked" id="clueLocked0">
+        <div class="clue-cat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/>
+          </svg>
+        </div>
+        <div class="clue-hint">Do the numbers in the quick prompt dashboard match the Excel?</div>
+        <div class="clue-cost-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          AI check · −5 pts
+        </div>
+        <button class="btn-unlock" id="clueBtn0" onclick="unlockClue(0)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Check it
+        </button>
+        <div class="clue-unlocked-badge" id="clueBadge0">CLUE UNLOCKED — −5 PTS</div>
+      </div>
+      <div class="clue-revealed" id="clueRevealed0">
+        <div class="clue-revealed-label">&#10003; Data Accuracy Check</div>
+        <div class="clue-finding">Of 7 KPI tiles in the Quick Prompt dashboard, 3 show figures from Q3 FY2024 rather than Q4 — the AI read column headers and inferred values rather than reading the correct cells. Revenue is under-reported by $3.1M. Gross margin shows 44.0% (the target) rather than 42.1% (the actual). A client who opens the source file during the meeting will see the discrepancy immediately.</div>
+      </div>
+    </div>
+
+    <!-- CLUE 2 -->
+    <div class="clue-card" id="clueCard1">
+      <div class="clue-locked" id="clueLocked1">
+        <div class="clue-cat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="clue-hint">Who is the Quick Prompt dashboard actually built for?</div>
+        <div class="clue-cost-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          AI check · −5 pts
+        </div>
+        <button class="btn-unlock" id="clueBtn1" onclick="unlockClue(1)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Check it
+        </button>
+        <div class="clue-unlocked-badge" id="clueBadge1">CLUE UNLOCKED — −5 PTS</div>
+      </div>
+      <div class="clue-revealed" id="clueRevealed1">
+        <div class="clue-revealed-label">&#10003; Audience Clarity Check</div>
+        <div class="clue-finding">The Quick Prompt dashboard has no named audience, no framing of the decision the room must make, and no hierarchy between headline numbers and supporting detail. It could be a weekly ops review, a board pack, or an internal monitoring screen. The Framed Prompt dashboard opens with the renewal risk question and gives the leadership team exactly one number to walk in with: 96.2% revenue attainment against a $44.5M target, with Nexus Dynamics flagged for immediate action.</div>
+      </div>
+    </div>
+
+    <!-- CLUE 3 -->
+    <div class="clue-card" id="clueCard2">
+      <div class="clue-locked" id="clueLocked2">
+        <div class="clue-cat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+          </svg>
+        </div>
+        <div class="clue-hint">What decision does each dashboard enable?</div>
+        <div class="clue-cost-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          AI check · −5 pts
+        </div>
+        <button class="btn-unlock" id="clueBtn2" onclick="unlockClue(2)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Check it
+        </button>
+        <div class="clue-unlocked-badge" id="clueBadge2">CLUE UNLOCKED — −5 PTS</div>
+      </div>
+      <div class="clue-revealed" id="clueRevealed2">
+        <div class="clue-revealed-label">&#10003; Actionability Check</div>
+        <div class="clue-finding">The Quick Prompt dashboard presents data. A reader can see the numbers but cannot determine what to do next without additional context. The Framed Prompt dashboard tells a story: revenue is close but below target, one client is at critical renewal risk before year-end, and the pipeline coverage for Q1 is below the 1.0x minimum. A leader reading it for the first time can make three decisions before the meeting starts.</div>
+      </div>
+    </div>
+
+  </div><!-- end clue-grid -->
+
+  <!-- SCORE TRACKER -->
+  <div class="score-tracker" id="scoreTracker">
+    <div class="tracker-inner">
+      <div class="tracker-score-block">
+        <div class="tracker-score-num" id="trackerScoreNum">0</div>
+        <div class="tracker-score-denom">/ <span id="trackerDenom">100</span></div>
+      </div>
+      <div class="tracker-steps">
+        <div class="tracker-step">
+          <div class="tracker-dot" id="dot1">1</div>
+          <span id="step1Label">Step 1</span>
+        </div>
+        <div class="tracker-line" id="line1"></div>
+        <div class="tracker-step">
+          <div class="tracker-dot" id="dot2">2</div>
+          <span id="step2Label">Step 2</span>
+        </div>
+        <div class="tracker-line" id="line2"></div>
+        <div class="tracker-step">
+          <div class="tracker-dot" id="dot3">3</div>
+          <span id="step3Label">Step 3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8: STEP 1 -->
+  <div class="step-section" id="step1Section">
+    <div class="step-header">
+      <div class="step-badge">1</div>
+      <div>
+        <div class="step-eyebrow">Your Call</div>
+        <div class="step-title">Which dashboard goes to the client?</div>
+      </div>
+    </div>
+    <div class="choices" id="step1Choices">
+      <button class="choice-btn" id="choice1A" onclick="chooseDecision('A')">
+        <div class="choice-label">Dashboard A — the quick prompt result</div>
+        <div class="choice-desc">The data is there. The charts are built. The client can read numbers. It is ready enough for a morning review.</div>
+      </button>
+      <button class="choice-btn" id="choice1B" onclick="chooseDecision('B')">
+        <div class="choice-label">Dashboard B — the framed prompt result</div>
+        <div class="choice-desc">Only the dashboard that reads from the file accurately and frames the leadership decision goes to the client. Framing first is not slower — it is safer.</div>
+      </button>
+    </div>
+    <div class="feedback-box" id="step1Feedback"></div>
+    <div class="reconsider-nudge" id="reconsiderNudge">&#8593; The data may matter more than it looks — want to reconsider?</div>
+  </div>
+
+  <!-- SECTION 9: STEP 2 -->
+  <div class="step-section" id="step2Section">
+    <div class="step-header">
+      <div class="step-badge">2</div>
+      <div>
+        <div class="step-eyebrow">The Why</div>
+        <div class="step-title">What actually made the difference?</div>
+      </div>
+    </div>
+    <div class="choices" id="step2Choices">
+      <button class="choice-btn" id="choice2A" onclick="chooseRootCause('A')">
+        <div class="choice-label">The AI tool — Colleague B used a better model</div>
+        <div class="choice-desc">Different models produce different outputs. Colleague B may have had access to a more capable or up-to-date version.</div>
+      </button>
+      <button class="choice-btn" id="choice2B" onclick="chooseRootCause('B')">
+        <div class="choice-label">The 5 minutes of framing before the prompt</div>
+        <div class="choice-desc">Colleague B read the data, decided what story it told, named the audience and the decision, then wrote a structured prompt. The thinking came first.</div>
+      </button>
+      <button class="choice-btn" id="choice2C" onclick="chooseRootCause('C')">
+        <div class="choice-label">The number of words in the prompt</div>
+        <div class="choice-desc">A longer prompt gives the AI more to work with. Colleague B simply wrote more.</div>
+      </button>
+    </div>
+    <div class="feedback-box" id="step2Feedback"></div>
+  </div>
+
+  <!-- SECTION 10: STEP 3 -->
+  <div class="step-section" id="step3Section">
+    <div class="step-header">
+      <div class="step-badge">3</div>
+      <div>
+        <div class="step-eyebrow">Honest Check</div>
+        <div class="step-title">How quickly did you spot the problem?</div>
+      </div>
+    </div>
+    <div class="choices" id="step3Choices">
+      <button class="choice-btn" id="choice3high" onclick="chooseConfidence('high')">
+        <div class="choice-label">Immediately — I saw it before unlocking any clues</div>
+        <div class="choice-desc">The data discrepancy and the lack of audience framing were obvious from the signal descriptions alone.</div>
+      </button>
+      <button class="choice-btn" id="choice3low" onclick="chooseConfidence('low')">
+        <div class="choice-label">I needed to check — I would have unlocked at least one clue</div>
+        <div class="choice-desc">I would have wanted to verify the data accuracy or audience framing before committing to a verdict.</div>
+      </button>
+    </div>
+    <div class="feedback-box" id="step3Feedback"></div>
+  </div>
+
+  <!-- SECTION 11: SCORECARD -->
+  <div class="scorecard" id="scorecard">
+    <div class="scorecard-eyebrow eyebrow">YOUR FINAL SCORE</div>
+    <div class="scorecard-score-row">
+      <div class="score-num-big" id="scorecardNum">0</div>
+      <div class="score-denom-big">/ <span id="scorecardDenom">100</span></div>
+    </div>
+    <div class="score-progress-bar-bg"><div class="score-progress-bar" id="scoreProgressBar"></div></div>
+    <div class="score-tier" id="scoreTier"></div>
+    <div class="score-tier-desc" id="scoreTierDesc"></div>
+    <div class="score-breakdown">
+      <div class="breakdown-row" id="bdStep1">
+        <span id="bdStep1Label">Step 1</span>
+        <span class="breakdown-pts" id="bdStep1Pts">0</span>
+      </div>
+      <div class="breakdown-row" id="bdStep2">
+        <span id="bdStep2Label">Step 2</span>
+        <span class="breakdown-pts" id="bdStep2Pts">0</span>
+      </div>
+      <div class="breakdown-row" id="bdStep3">
+        <span id="bdStep3Label">Step 3</span>
+        <span class="breakdown-pts" id="bdStep3Pts">0</span>
+      </div>
+      <div class="breakdown-row" id="bdClues" style="display:none;">
+        <span id="bdCluesLabel">Clues used</span>
+        <span class="breakdown-pts negative" id="bdCluesPts">0</span>
+      </div>
+      <div class="breakdown-row total-row">
+        <span>Total</span>
+        <span class="breakdown-pts" id="bdTotal">0</span>
+      </div>
+    </div>
+    <div class="takeaway-box" id="takeawayBox"></div>
+  </div>
+
+  <!-- SECTION 12: COST REVEAL PANEL -->
+  <div class="cost-panel" id="costPanel">
+    <div class="eyebrow" style="color:var(--muted); margin-bottom:20px;">COST BREAKDOWN</div>
+    <div class="cost-cols">
+      <div>
+        <div class="cost-col-label">Framing time invested</div>
+        <div class="cost-col-value" id="costTime">5 min</div>
+        <div class="cost-col-note">Brief + Frame phases before writing a single prompt line</div>
+      </div>
+      <div>
+        <div class="cost-col-label">AI build cost</div>
+        <div class="cost-col-value">$0.004</div>
+        <div class="cost-col-note">One complete HTML dashboard built from a structured prompt</div>
+      </div>
+      <div>
+        <div class="cost-col-label">Outcome</div>
+        <div class="cost-col-value" id="costOutcomeVal">—</div>
+        <div class="cost-col-note" id="costOutcomeNote"></div>
+      </div>
+    </div>
+    <div class="cost-insight" id="costInsight"></div>
+  </div>
+
+</div><!-- end page-wrap -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+var score = 0, cluesUsed = 0, step1Pts = 0, step2Pts = 0, confidencePts = 0;
+var decision = null, rootCause = null, confidence = null, humanUnlocked = false;
+var step2Marked = false, step3Marked = false;
+var timerSeconds = 180, timerRunning = false, timerInterval = null;
+var clueUnlocking = [false, false, false];
+var clueUnlocked = [false, false, false];
+
+function getFinalScore() {
+  return Math.max(0, score);
+}
+
+function getMaxScore() {
+  return 100 - cluesUsed * 5;
+}
+
+/* ---- TIMER ---- */
+function formatTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function timerTick() {
+  if (timerSeconds <= 0) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timerStartBtn').textContent = 'Start';
+    document.getElementById('timerDisplay').textContent = '0:00';
+    return;
+  }
+  timerSeconds--;
+  var disp = document.getElementById('timerDisplay');
+  disp.textContent = formatTime(timerSeconds);
+  if (timerSeconds < 60) {
+    disp.classList.add('urgent');
+  } else {
+    disp.classList.remove('urgent');
+  }
+}
+
+function timerToggle() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timerStartBtn').textContent = 'Resume';
+  } else {
+    timerRunning = true;
+    document.getElementById('timerStartBtn').textContent = 'Pause';
+    timerInterval = setInterval(timerTick, 1000);
+  }
+}
+
+function timerReset() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = 180;
+  document.getElementById('timerDisplay').textContent = '3:00';
+  document.getElementById('timerDisplay').classList.remove('urgent');
+  document.getElementById('timerStartBtn').textContent = 'Start';
+}
+
+/* ---- PARTICLES ---- */
+function spawnParticles(el) {
+  var rect = el.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2;
+  var cy = rect.top + rect.height / 2;
+  var chars = ['★','★','✶','◆','●','✶','★','◆'];
+  var colors = ['#F59E0B','#4F46E5','#D97706','#A3E635','#F59E0B','#4F46E5','#FCD34D','#818CF8'];
+  for (var i = 0; i < 14; i++) {
+    var p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = chars[i % chars.length];
+    p.style.color = colors[i % colors.length];
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    document.body.appendChild(p);
+    var angle = (i / 14) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+    var dist = 60 + Math.random() * 60;
+    var tx = Math.cos(angle) * dist;
+    var ty = Math.sin(angle) * dist;
+    var dur = 0.65 + Math.random() * 0.45;
+    gsap.to(p, {
+      x: tx, y: ty,
+      rotation: (Math.random() - 0.5) * 360,
+      opacity: 0,
+      duration: dur,
+      ease: 'power2.out',
+      onComplete: function(el) { if (el.parentNode) el.parentNode.removeChild(el); },
+      onCompleteParams: [p]
+    });
+  }
+}
+
+function spawnPtsBadge(el, pts) {
+  var rect = el.getBoundingClientRect();
+  var badge = document.createElement('div');
+  badge.className = 'pts-badge';
+  badge.textContent = '+' + pts + ' pts';
+  badge.style.background = '#F59E0B';
+  badge.style.color = '#fff';
+  badge.style.left = (rect.left + rect.width / 2 - 30) + 'px';
+  badge.style.top = rect.top + 'px';
+  document.body.appendChild(badge);
+  gsap.fromTo(badge,
+    { scale: 0.5, opacity: 0 },
+    {
+      scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(2.5)',
+      onComplete: function() {
+        gsap.to(badge, {
+          y: -40, opacity: 0, delay: 1.1, duration: 0.4,
+          onComplete: function() { if (badge.parentNode) badge.parentNode.removeChild(badge); }
+        });
+      }
+    }
+  );
+}
+
+function spawnMinusBadge(el, pts) {
+  var rect = el.getBoundingClientRect();
+  var badge = document.createElement('div');
+  badge.className = 'pts-badge';
+  badge.textContent = '−' + pts + ' pts';
+  badge.style.background = '#FEE2E2';
+  badge.style.color = '#DC2626';
+  badge.style.border = '1px solid #FCA5A5';
+  badge.style.left = (rect.left + rect.width / 2 - 25) + 'px';
+  badge.style.top = rect.top + 'px';
+  document.body.appendChild(badge);
+  gsap.fromTo(badge,
+    { opacity: 1, y: 0 },
+    {
+      y: 30, opacity: 0, duration: 1.0, ease: 'power2.in',
+      onComplete: function() { if (badge.parentNode) badge.parentNode.removeChild(badge); }
+    }
+  );
+}
+
+/* ---- SCORE TRACKER ---- */
+function updateTrackerScore() {
+  var el = document.getElementById('trackerScoreNum');
+  gsap.to({ val: parseFloat(el.textContent) || 0 }, {
+    val: getFinalScore(),
+    duration: 0.5,
+    ease: 'power2.out',
+    onUpdate: function() {
+      el.textContent = Math.round(this.targets()[0].val);
+    }
+  });
+}
+
+function updateMaxDisplay() {
+  document.getElementById('trackerDenom').textContent = getMaxScore();
+}
+
+function markTrackerStep(n, pts) {
+  var dot = document.getElementById('dot' + n);
+  dot.classList.remove('active');
+  dot.classList.add('done');
+  dot.textContent = '✓';
+  var label = document.getElementById('step' + n + 'Label');
+  label.innerHTML = 'Step ' + n + ' <span class="tracker-pts-label">+' + pts + '</span>';
+  if (n < 3) {
+    var line = document.getElementById('line' + n);
+    gsap.to(line, { backgroundColor: '#4F46E5', duration: 0.4 });
+    var nextDot = document.getElementById('dot' + (n + 1));
+    nextDot.classList.add('active');
+  }
+}
+
+function showTracker() {
+  var t = document.getElementById('scoreTracker');
+  t.style.display = 'block';
+  gsap.to(t, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+  document.getElementById('dot1').classList.add('active');
+}
+
+/* ---- STEP 1 ---- */
+function chooseDecision(choice) {
+  if (choice === decision) return;
+
+  /* reverse previous pts */
+  score -= step1Pts;
+  score -= step2Pts;
+  score -= confidencePts;
+  step2Pts = 0;
+  confidencePts = 0;
+
+  decision = choice;
+
+  if (choice === 'B') {
+    step1Pts = 40;
+    score += 40;
+  } else {
+    step1Pts = 0;
+  }
+
+  /* style buttons */
+  var btnA = document.getElementById('choice1A');
+  var btnB = document.getElementById('choice1B');
+  btnA.classList.remove('selected','correct','wrong');
+  btnB.classList.remove('selected','correct','wrong');
+  if (choice === 'B') {
+    btnB.classList.add('correct');
+    btnA.classList.remove('selected');
+  } else {
+    btnA.classList.add('wrong');
+  }
+
+  /* feedback */
+  var fb = document.getElementById('step1Feedback');
+  if (choice === 'B') {
+    fb.className = 'feedback-box correct-fb';
+    fb.textContent = 'Correct. Dashboard B read the data accurately, named the audience, and answered the question the leadership team needed answered before they walked into the room. That came from 5 minutes of framing — not from a better AI tool.';
+    document.getElementById('reconsiderNudge').style.display = 'none';
+  } else {
+    fb.className = 'feedback-box wrong-fb';
+    fb.textContent = 'Dashboard A has three figures that do not match the source file and no framing for the decision the room needs to make. Sending it risks a data challenge mid-meeting — the most trust-damaging moment in a client relationship.';
+    document.getElementById('reconsiderNudge').style.display = 'block';
+  }
+  fb.style.display = 'block';
+  gsap.from(fb, { opacity: 0, y: 10, duration: 0.35, ease: 'power2.out' });
+
+  updateTrackerScore();
+  markTrackerStep(1, step1Pts);
+
+  /* reset step 2 and 3 */
+  resetStep2UI();
+  resetStep3UI();
+
+  /* show step 2 */
+  revealSection('step2Section');
+}
+
+function resetStep2UI() {
+  var s2 = document.getElementById('step2Section');
+  if (s2.style.display === 'block') {
+    ['choice2A','choice2B','choice2C'].forEach(function(id) {
+      var el = document.getElementById(id);
+      el.classList.remove('selected','correct','wrong');
+    });
+    document.getElementById('step2Feedback').style.display = 'none';
+  }
+  rootCause = null;
+  step2Pts = 0;
+  step2Marked = false;
+  /* reset tracker step 2 */
+  var d2 = document.getElementById('dot2');
+  d2.classList.remove('done','active');
+  d2.textContent = '2';
+  document.getElementById('step2Label').innerHTML = 'Step 2';
+  document.getElementById('line1').style.background = '';
+}
+
+function resetStep3UI() {
+  var s3 = document.getElementById('step3Section');
+  s3.style.display = 'none';
+  confidence = null;
+  confidencePts = 0;
+  step3Marked = false;
+  ['choice3high','choice3low'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.classList.remove('selected','correct','wrong');
+  });
+  document.getElementById('step3Feedback').style.display = 'none';
+  /* reset tracker step 3 */
+  var d3 = document.getElementById('dot3');
+  d3.classList.remove('done','active');
+  d3.textContent = '3';
+  document.getElementById('step3Label').innerHTML = 'Step 3';
+  document.getElementById('line2').style.background = '';
+}
+
+/* ---- STEP 2 ---- */
+function chooseRootCause(key) {
+  score -= step2Pts;
+  score -= confidencePts;
+  confidencePts = 0;
+
+  rootCause = key;
+
+  if (key === 'B') { step2Pts = 40; }
+  else if (key === 'C') { step2Pts = 20; }
+  else { step2Pts = 0; }
+  score += step2Pts;
+
+  ['choice2A','choice2B','choice2C'].forEach(function(id) {
+    document.getElementById(id).classList.remove('selected','correct','wrong');
+  });
+  var chosen = document.getElementById('choice2' + key);
+  if (key === 'B') { chosen.classList.add('correct'); }
+  else { chosen.classList.add(key === 'A' ? 'wrong' : 'selected'); }
+
+  var fb = document.getElementById('step2Feedback');
+  if (key === 'B') {
+    fb.className = 'feedback-box correct-fb';
+    fb.textContent = 'Correct. Colleague B\'s prompt named the audience in Area 1 and described the specific sections in Area 4 before the AI wrote a single line. The AI read the file rather than guessing from headers because the prompt told it to. Structure in = structure out.';
+  } else if (key === 'C') {
+    fb.className = 'feedback-box';
+    fb.style.background = '#FFFBEB';
+    fb.style.border = '1px solid #FCD34D';
+    fb.style.color = '#78350F';
+    fb.textContent = 'Partly — length matters, but only because it carried more specificity. A longer vague prompt still produces a vague result. What made Colleague B\'s prompt longer was that it had 5 distinct areas, not that it had more words. The structure was the signal.';
+  } else {
+    fb.className = 'feedback-box wrong-fb';
+    fb.textContent = 'Same model, same file, same task. The AI did not decide the output quality — the prompt did. The model is a constant; the thinking before the prompt is the variable.';
+  }
+  fb.style.display = 'block';
+  gsap.from(fb, { opacity: 0, y: 10, duration: 0.35, ease: 'power2.out' });
+
+  updateTrackerScore();
+  if (!step2Marked) {
+    markTrackerStep(2, step2Pts);
+    step2Marked = true;
+  } else {
+    document.getElementById('step2Label').innerHTML = 'Step 2 <span class="tracker-pts-label">+' + step2Pts + '</span>';
+  }
+
+  resetStep3UI();
+  revealSection('step3Section');
+}
+
+/* ---- STEP 3 ---- */
+function chooseConfidence(choice) {
+  score -= confidencePts;
+  confidence = choice;
+
+  /* calibrated scoring */
+  var calibrated = (decision === 'B' && choice === 'high') || (decision === 'A' && choice === 'low');
+  confidencePts = calibrated ? 20 : 15;
+  score += confidencePts;
+
+  ['choice3high','choice3low'].forEach(function(id) {
+    document.getElementById(id).classList.remove('selected','correct','wrong');
+  });
+  document.getElementById('choice3' + choice).classList.add('correct');
+
+  var fb = document.getElementById('step3Feedback');
+  fb.className = 'feedback-box correct-fb';
+  if (calibrated) {
+    fb.textContent = 'Well-calibrated. Your confidence matched your decision — that is the right way to self-assess.';
+  } else {
+    fb.textContent = 'Slight mismatch — but noted. Knowing when you need a second check is a skill worth developing.';
+  }
+  fb.style.display = 'block';
+  gsap.from(fb, { opacity: 0, y: 10, duration: 0.35, ease: 'power2.out' });
+
+  updateTrackerScore();
+  if (!step3Marked) {
+    markTrackerStep(3, confidencePts);
+    step3Marked = true;
+  }
+
+  setTimeout(function() { showScorecard(); }, 700);
+}
+
+/* ---- CLUE UNLOCK ---- */
+function unlockClue(n) {
+  if (clueUnlocked[n] || clueUnlocking[n]) return;
+  clueUnlocking[n] = true;
+
+  var card = document.getElementById('clueCard' + n);
+  var btn = document.getElementById('clueBtn' + n);
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⧗</span> Checking...';
+
+  /* Stage 1: bounce */
+  gsap.to(card, { y: -10, duration: 0.1, yoyo: true, repeat: 1, ease: 'power1.inOut' });
+
+  /* Stage 2: lock shake */
+  setTimeout(function() {
+    gsap.to(card, { x: -6, duration: 0.07, yoyo: true, repeat: 5, ease: 'power1.inOut',
+      onComplete: function() { gsap.set(card, { x: 0 }); }
+    });
+  }, 500);
+
+  /* Stage 3: flash and reveal */
+  setTimeout(function() {
+    gsap.to(card, { borderColor: '#F59E0B', duration: 0.15, yoyo: true, repeat: 1,
+      onComplete: function() {
+        gsap.to(card, { borderColor: '#4F46E5', duration: 0.25,
+          onComplete: function() {
+            clueUnlocked[n] = true;
+            clueUnlocking[n] = false;
+            cluesUsed++;
+            score -= 5;
+            if (score < 0) score = 0;
+            updateMaxDisplay();
+            updateTrackerScore();
+
+            var locked = document.getElementById('clueLocked' + n);
+            var revealed = document.getElementById('clueRevealed' + n);
+            gsap.to(locked, { opacity: 0, y: -10, duration: 0.25,
+              onComplete: function() {
+                locked.style.display = 'none';
+                revealed.style.display = 'block';
+                gsap.from(revealed, { opacity: 0, y: 10, duration: 0.3, ease: 'power2.out' });
+              }
+            });
+
+            var badge = document.getElementById('clueBadge' + n);
+            badge.style.display = 'block';
+            gsap.from(badge, { opacity: 0, duration: 0.3 });
+
+            spawnParticles(btn);
+            spawnMinusBadge(btn, 5);
+          }
+        });
+      }
+    });
+  }, 1300);
+}
+
+/* ---- FRAMED PROMPT REVEAL ---- */
+function unlockFramedPromptManual(btn) {
+  if (humanUnlocked || btn.disabled) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⧗</span> Revealing...';
+
+  setTimeout(function() {
+    spawnParticles(btn);
+    unlockFramedPrompt();
+  }, 1100);
+}
+
+function unlockFramedPrompt() {
+  humanUnlocked = true;
+  var overlay = document.getElementById('lockOverlay');
+  gsap.to(overlay, {
+    opacity: 0, scale: 1.04, duration: 0.55, ease: 'power2.in',
+    onComplete: function() {
+      overlay.style.display = 'none';
+      var fc = document.getElementById('framedCard');
+      gsap.to(fc, { boxShadow: '0 0 0 2px #4F46E5', duration: 0.4 });
+    }
+  });
+}
+
+/* ---- SCORECARD ---- */
+function showScorecard() {
+  var final = getFinalScore();
+  var maxS = getMaxScore();
+
+  /* determine tier */
+  var tier, tierDesc;
+  if (final >= 95) {
+    tier = 'Prompt-ready';
+    tierDesc = 'No scaffolding needed. You identified the gap, chose the right dashboard, and knew exactly why the framing mattered.';
+  } else if (final >= 80) {
+    tier = 'Strong instinct';
+    tierDesc = 'Right call, right reason. You understand that the prompt is the thinking — not just the typing.';
+  } else if (final >= 65) {
+    tier = 'Right direction';
+    tierDesc = 'Right dashboard, slightly unclear on why. The root cause is always the framing, not the tool.';
+  } else {
+    tier = 'Build risk';
+    tierDesc = 'The quick prompt result felt ready enough — but that is exactly when wrong numbers reach clients. This session will change that.';
+  }
+
+  /* takeaway */
+  var takeaway;
+  if (final >= 95 && cluesUsed === 0) {
+    takeaway = 'Perfect read. You identified the framing gap without needing to check — which means the Brief and Frame phases of today\'s activities will feel natural, not procedural. That is the instinct this workshop is designed to build.';
+  } else if (final >= 85) {
+    takeaway = 'Right call, right reason. You understood that the 5 minutes of framing before the prompt is what produced a result worth sending. That is exactly what the Brief → Frame → Prompt structure makes systematic.';
+  } else if (final >= 65) {
+    takeaway = 'Right direction. The framed prompt was clearly better — the root cause is that structure before the prompt is what makes the AI read the file rather than guess from it.';
+  } else {
+    takeaway = 'The quick prompt felt ready enough — but three of its figures were wrong and no one in the room would have known what decision to make. The skill this session builds is the 5 minutes before you type.';
+  }
+
+  /* step labels */
+  var s1lbl = decision === 'B' ? 'Dashboard B — framed prompt' : 'Dashboard A — quick prompt';
+  var s2lbl = rootCause === 'B' ? '5 minutes of framing' : (rootCause === 'C' ? 'Number of words' : 'Better AI model');
+  var s3lbl = step3Marked ? ((decision === 'B' && confidence === 'high') || (decision === 'A' && confidence === 'low') ? 'Well-calibrated confidence' : 'Confidence — slight mismatch') : 'Step 3';
+
+  document.getElementById('scoreTier').textContent = tier;
+  document.getElementById('scoreTierDesc').textContent = tierDesc;
+  document.getElementById('scorecardDenom').textContent = maxS;
+  document.getElementById('bdStep1Label').textContent = s1lbl;
+  document.getElementById('bdStep1Pts').textContent = (step1Pts > 0 ? '+' : '') + step1Pts;
+  document.getElementById('bdStep2Label').textContent = s2lbl;
+  document.getElementById('bdStep2Pts').textContent = (step2Pts > 0 ? '+' : '') + step2Pts;
+  document.getElementById('bdStep3Label').textContent = s3lbl;
+  document.getElementById('bdStep3Pts').textContent = (confidencePts > 0 ? '+' : '') + confidencePts;
+  document.getElementById('bdTotal').textContent = final;
+  document.getElementById('takeawayBox').textContent = takeaway;
+
+  if (cluesUsed > 0) {
+    var clueRow = document.getElementById('bdClues');
+    clueRow.style.display = 'flex';
+    document.getElementById('bdCluesLabel').textContent = 'Clues used: ' + cluesUsed + ' × −5 pts';
+    document.getElementById('bdCluesPts').textContent = '−' + (cluesUsed * 5);
+  }
+
+  var sc = document.getElementById('scorecard');
+  sc.style.display = 'block';
+  gsap.fromTo(sc, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+
+  /* animate score number */
+  var obj = { val: 0 };
+  gsap.to(obj, {
+    val: final, duration: 1.2, ease: 'power2.out',
+    onUpdate: function() {
+      document.getElementById('scorecardNum').textContent = Math.round(obj.val);
+    }
+  });
+
+  /* animate progress bar */
+  setTimeout(function() {
+    document.getElementById('scoreProgressBar').style.width = Math.min(100, (final / 100) * 100) + '%';
+  }, 200);
+
+  /* cost panel */
+  showCostPanel(final);
+
+  setTimeout(function() {
+    sc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 400);
+}
+
+function showCostPanel(final) {
+  var clueTime = 5 + cluesUsed * 5;
+  document.getElementById('costTime').textContent = clueTime + ' min';
+
+  var outcomeVal = document.getElementById('costOutcomeVal');
+  var outcomeNote = document.getElementById('costOutcomeNote');
+
+  if (decision === 'B') {
+    outcomeVal.textContent = 'Client-ready in 20 min';
+    outcomeVal.className = 'cost-col-value indigo';
+    outcomeNote.textContent = 'Accurate data, named decision, zero corrections needed.';
+  } else {
+    outcomeVal.textContent = '$1.8M at risk';
+    outcomeVal.className = 'cost-col-value red';
+    outcomeNote.textContent = 'Three wrong figures in a client QBR. Trust is harder to rebuild than a dashboard.';
+  }
+
+  var insight = document.getElementById('costInsight');
+  if (decision === 'B' && cluesUsed === 0) {
+    insight.textContent = 'Optimal. You read the signals, identified the framing gap, and made the call without needing a single AI check. The 5-minute investment in Brief and Frame phases is what produced a result worth sending in 20 minutes total.';
+  } else if (decision === 'B') {
+    insight.textContent = 'Good call. The ' + cluesUsed * 5 + ' minutes spent checking confirmed what the framing gap already signalled — that structure before the prompt is what makes AI output trustworthy, not the model.';
+  } else {
+    insight.textContent = 'Reframe the cost. The quick prompt took 2 minutes to write and $0.004 to run. Sending a dashboard with wrong figures to a $1.8M client account costs significantly more than 5 minutes of framing.';
+  }
+
+  var cp = document.getElementById('costPanel');
+  cp.style.display = 'block';
+  gsap.fromTo(cp, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.3 });
+}
+
+/* ---- REVEAL SECTION ---- */
+function revealSection(id) {
+  var el = document.getElementById(id);
+  el.style.display = 'block';
+  gsap.fromTo(el,
+    { opacity: 0, y: 28 },
+    { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out',
+      onComplete: function() {
+        /* stagger buttons */
+        var btns = el.querySelectorAll('.choice-btn');
+        gsap.fromTo(btns,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: 'back.out(1.5)' }
+        );
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  );
+}
+
+/* ---- RESET ---- */
+function resetActivity() {
+  /* state */
+  score = 0; cluesUsed = 0; step1Pts = 0; step2Pts = 0; confidencePts = 0;
+  decision = null; rootCause = null; confidence = null; humanUnlocked = false;
+  step2Marked = false; step3Marked = false;
+  clueUnlocking = [false, false, false];
+  clueUnlocked = [false, false, false];
+
+  /* timer */
+  timerReset();
+
+  /* lock overlay */
+  var overlay = document.getElementById('lockOverlay');
+  overlay.style.display = '';
+  gsap.set(overlay, { opacity: 1, scale: 1 });
+  var revBtn = document.getElementById('revealBtn');
+  revBtn.disabled = false;
+  revBtn.innerHTML = '<span>★</span> Reveal the result';
+  document.getElementById('framedCard').style.boxShadow = '';
+
+  /* step sections */
+  ['step1Section','step2Section','step3Section'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'none';
+    el.style.opacity = '0';
+  });
+
+  /* step 1 buttons */
+  ['choice1A','choice1B'].forEach(function(id) {
+    document.getElementById(id).classList.remove('selected','correct','wrong');
+  });
+  document.getElementById('step1Feedback').style.display = 'none';
+  document.getElementById('reconsiderNudge').style.display = 'none';
+
+  /* step 2 buttons */
+  ['choice2A','choice2B','choice2C'].forEach(function(id) {
+    document.getElementById(id).classList.remove('selected','correct','wrong');
+  });
+  document.getElementById('step2Feedback').style.display = 'none';
+
+  /* step 3 buttons */
+  ['choice3high','choice3low'].forEach(function(id) {
+    document.getElementById(id).classList.remove('selected','correct','wrong');
+  });
+  document.getElementById('step3Feedback').style.display = 'none';
+
+  /* tracker */
+  document.getElementById('scoreTracker').style.display = 'none';
+  document.getElementById('trackerScoreNum').textContent = '0';
+  document.getElementById('trackerDenom').textContent = '100';
+  ['dot1','dot2','dot3'].forEach(function(id, i) {
+    var d = document.getElementById(id);
+    d.classList.remove('active','done');
+    d.textContent = i + 1;
+  });
+  ['step1Label','step2Label','step3Label'].forEach(function(id, i) {
+    document.getElementById(id).innerHTML = 'Step ' + (i + 1);
+  });
+  ['line1','line2'].forEach(function(id) {
+    document.getElementById(id).style.background = '';
+  });
+
+  /* clue cards */
+  for (var n = 0; n < 3; n++) {
+    document.getElementById('clueLocked' + n).style.display = '';
+    gsap.set(document.getElementById('clueLocked' + n), { opacity: 1, y: 0 });
+    document.getElementById('clueRevealed' + n).style.display = 'none';
+    document.getElementById('clueBadge' + n).style.display = 'none';
+    var btn = document.getElementById('clueBtn' + n);
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Check it';
+    var card = document.getElementById('clueCard' + n);
+    gsap.set(card, { borderColor: '', x: 0, y: 0 });
+  }
+
+  /* scorecard + cost panel */
+  document.getElementById('scorecard').style.display = 'none';
+  document.getElementById('costPanel').style.display = 'none';
+  document.getElementById('bdClues').style.display = 'none';
+  document.getElementById('scoreProgressBar').style.width = '0%';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  /* re-show tracker section with step 1 on next interaction */
+}
+
+/* ---- PAGE INIT ---- */
+(function init() {
+  gsap.to('#pageHeader', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: 0.1,
+    from: { opacity: 0, y: 28 } });
+  gsap.from('#pageHeader', { opacity: 0, y: 28, duration: 0.6, ease: 'power2.out', delay: 0.1 });
+  gsap.from('#contextBar', { opacity: 0, y: 28, duration: 0.5, ease: 'power2.out', delay: 0.25 });
+  gsap.to('#contextBar', { opacity: 1, duration: 0.5, delay: 0.25 });
+  gsap.from('#timerRow', { opacity: 0, y: 28, duration: 0.5, ease: 'power2.out', delay: 0.4 });
+  gsap.to('#timerRow', { opacity: 1, duration: 0.5, delay: 0.4 });
+  gsap.from('#scenarioCard', { opacity: 0, y: 28, duration: 0.5, ease: 'power2.out', delay: 0.55 });
+  gsap.to('#scenarioCard', { opacity: 1, duration: 0.5, delay: 0.55 });
+  gsap.from('#splitView', { opacity: 0, y: 28, duration: 0.5, ease: 'power2.out', delay: 0.7 });
+  gsap.to('#splitView', { opacity: 1, duration: 0.5, delay: 0.7 });
+  gsap.from('#qualityBanner', { opacity: 0, y: 28, duration: 0.5, ease: 'power2.out', delay: 0.85 });
+  gsap.to('#qualityBanner', { opacity: 1, duration: 0.5, delay: 0.85 });
+  gsap.from('#clueGrid', { opacity: 0, y: 28, duration: 0.5, ease: 'power2.out', delay: 1.0 });
+  gsap.to('#clueGrid', { opacity: 1, duration: 0.5, delay: 1.0 });
+
+  /* show tracker + step 1 after a moment */
+  setTimeout(function() {
+    showTracker();
+    revealSection('step1Section');
+  }, 1200);
+})();
+</script>
+</body>
+</html>
