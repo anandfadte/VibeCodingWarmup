@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frame First — AI for Vibe Coding · Genpact</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,600;9..144,1,700;9..144,1,800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F8FC;
+  --surface: #FFFFFF;
+  --surface-2: #F0F2F8;
+  --ink: #111827;
+  --ink-2: #374151;
+  --muted: #6B7280;
+  --muted-2: #9CA3AF;
+  --line: #E5E7EB;
+  --accent: #4F46E5;
+  --accent-dark: #4338CA;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+
+  --el-role-bg: #F5F3FF; --el-role-border: #DDD6FE; --el-role-ink: #5B21B6; --el-role-badge: #7C3AED;
+  --el-ctx-bg: #EFF6FF;  --el-ctx-border: #BFDBFE;  --el-ctx-ink: #1D4ED8; --el-ctx-badge: #2563EB;
+  --el-ctrl-bg: #FFF1F2; --el-ctrl-border: #FECDD3; --el-ctrl-ink: #BE123C; --el-ctrl-badge: #E11D48;
+  --el-task-bg: #FFFBEB; --el-task-border: #FDE68A; --el-task-ink: #B45309; --el-task-badge: #D97706;
+  --el-out-bg: #F0FDF4;  --el-out-border: #BBF7D0;  --el-out-ink: #065F46;  --el-out-badge: #059669;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ─── SCREENS ─────────────────────────────────────────────── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ─── JOIN ─────────────────────────────────────────────────── */
+#s-join {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+.join-wrap { max-width: 480px; width: 100%; text-align: center; }
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.main-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(44px, 8vw, 68px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+.main-title em { font-style: italic; color: var(--accent); }
+
+.main-tagline {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto 32px;
+}
+
+.join-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-align: left;
+  margin-bottom: 8px;
+}
+.join-card input {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 16px;
+}
+.join-card input:focus { border-color: var(--accent); }
+.join-error { font-size: 12px; color: #DC2626; min-height: 20px; text-align: left; margin-top: -10px; margin-bottom: 10px; }
+
+.btn-primary {
+  width: 100%;
+  height: 50px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-primary:active { transform: scale(0.98); }
+
+.join-meta { font-size: 11px; color: var(--muted-2); margin-top: 20px; letter-spacing: 0.03em; }
+
+/* ─── CHALLENGE ────────────────────────────────────────────── */
+#s-challenge { min-height: 100vh; display: flex; flex-direction: column; }
+
+.challenge-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.player-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border-radius: 20px;
+  padding: 5px 14px;
+}
+.timer-block { text-align: right; }
+.timer-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+.timer-num {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  transition: color 0.3s;
+}
+.timer-num.warn { color: #D97706; }
+.timer-num.urgent { color: #DC2626; }
+.timer-num.expired { color: #DC2626; }
+
+.challenge-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 0;
+  flex: 1;
+  max-width: 1160px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted-2);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* Left panel */
+.challenge-left { display: flex; flex-direction: column; gap: 12px; }
+
+.context-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.context-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.context-card p { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+.context-card strong { color: var(--ink); }
+
+.quick-prompt-card {
+  background: #FFF8F1;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.qp-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #B45309;
+  margin-bottom: 6px;
+}
+.qp-text {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.qp-meta { font-size: 11px; color: #92400E; }
+
+.dashboard-frame-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dashboard-frame {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.dashboard-frame svg { display: block; width: 100%; height: auto; }
+
+/* Right panel */
+.challenge-right { display: flex; flex-direction: column; gap: 12px; }
+
+.write-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+.framework-grid { display: flex; flex-direction: column; gap: 6px; }
+
+.element-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: transform 0.1s;
+}
+.el-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+.el-name { font-size: 12px; font-weight: 700; line-height: 1.2; }
+.el-hint { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+.el-role   { background: var(--el-role-bg);  border-color: var(--el-role-border); }
+.el-role   .el-badge { background: var(--el-role-badge); }
+.el-role   .el-name  { color: var(--el-role-ink); }
+
+.el-ctx    { background: var(--el-ctx-bg);   border-color: var(--el-ctx-border); }
+.el-ctx    .el-badge { background: var(--el-ctx-badge); }
+.el-ctx    .el-name  { color: var(--el-ctx-ink); }
+
+.el-ctrl   { background: var(--el-ctrl-bg);  border-color: var(--el-ctrl-border); }
+.el-ctrl   .el-badge { background: var(--el-ctrl-badge); }
+.el-ctrl   .el-name  { color: var(--el-ctrl-ink); }
+
+.el-task   { background: var(--el-task-bg);  border-color: var(--el-task-border); }
+.el-task   .el-badge { background: var(--el-task-badge); }
+.el-task   .el-name  { color: var(--el-task-ink); }
+
+.el-out    { background: var(--el-out-bg);   border-color: var(--el-out-border); }
+.el-out    .el-badge { background: var(--el-out-badge); }
+.el-out    .el-name  { color: var(--el-out-ink); }
+
+#promptInput {
+  width: 100%;
+  min-height: 150px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--surface);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 1.6;
+}
+#promptInput:focus { border-color: var(--accent); }
+#promptInput::placeholder { color: var(--muted-2); }
+
+.writing-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.word-count { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+#lockBtn { width: auto; padding: 0 24px; }
+
+/* ─── RESULTS ──────────────────────────────────────────────── */
+#s-results { padding: 32px 16px 64px; }
+.results-wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+.score-hero {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.score-player { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.score-row { display: flex; align-items: baseline; gap: 4px; }
+.score-number {
+  font-family: 'Fraunces', serif;
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+.score-denom { font-family: 'Fraunces', serif; font-size: 28px; color: var(--muted-2); line-height: 1; }
+.score-tier {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 20px;
+  margin-top: 12px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+/* Dimension bars */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.dim-section, .your-prompt-section, .expert-section, .leaderboard-section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+}
+.dim-row { margin-bottom: 14px; }
+.dim-row:last-child { margin-bottom: 0; }
+.dim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.dim-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.dim-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dim-pts { font-size: 13px; font-weight: 700; color: var(--ink); }
+.dim-bar-bg { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.dim-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.dim-tip { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+/* Your prompt */
+.your-prompt-text {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  font-style: italic;
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--accent);
+}
+
+/* Expert section */
+.expert-desc { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.expert-prompt-text {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+.expert-prompt-text span {
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+.ep-role   { background: var(--el-role-bg); }
+.ep-ctx    { background: var(--el-ctx-bg); }
+.ep-ctrl   { background: var(--el-ctrl-bg); }
+.ep-task   { background: var(--el-task-bg); }
+.ep-out    { background: var(--el-out-bg); }
+
+.ep-key-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.ep-key {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+.epk-role  { background: var(--el-role-bg);  color: var(--el-role-ink); }
+.epk-ctx   { background: var(--el-ctx-bg);   color: var(--el-ctx-ink); }
+.epk-ctrl  { background: var(--el-ctrl-bg);  color: var(--el-ctrl-ink); }
+.epk-task  { background: var(--el-task-bg);  color: var(--el-task-ink); }
+.epk-out   { background: var(--el-out-bg);   color: var(--el-out-ink); }
+
+.dashboard-b-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 20px; margin-bottom: 10px; }
+
+/* Leaderboard */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.lb-row:last-of-type { border-bottom: none; }
+.lb-rank {
+  width: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted-2);
+  text-align: center;
+  flex-shrink: 0;
+}
+.lb-rank.gold { color: #B45309; }
+.lb-rank.silver { color: #6B7280; }
+.lb-rank.bronze { color: #92400E; }
+.lb-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.lb-name.benchmark { font-style: italic; color: var(--muted); }
+.lb-score { font-size: 14px; font-weight: 700; color: var(--ink); }
+.lb-score.top { color: var(--accent); }
+.lb-you { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: var(--accent); color: white; }
+
+.lb-note { font-size: 11px; color: var(--muted-2); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+.btn-secondary {
+  display: inline-block;
+  margin-top: 16px;
+  height: 42px;
+  padding: 0 20px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-secondary:hover { background: var(--line); }
+
+/* ─── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .challenge-grid { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+  .challenge-topbar { padding: 10px 16px; }
+}
+@media (max-width: 480px) {
+  .main-title { font-size: 48px; }
+  .score-number { font-size: 60px; }
+  .dim-section, .your-prompt-section, .expert-section, .leaderboard-section { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 1 — JOIN
+══════════════════════════════════════════════════════════════ -->
+<section id="s-join" class="screen active">
+  <div class="join-wrap">
+    <div class="eyebrow">WARM-UP · AI FOR VIBE CODING · GENPACT APPLIED AI STUDIO</div>
+    <h1 class="main-title">Frame <em>First.</em></h1>
+    <p class="main-tagline">Your team lead used a 4-word prompt at 11pm. See what the AI produced. Write a better one using the 5-element framework. Three minutes. One shot.</p>
+    <div class="join-card">
+      <div class="field-label">Your name</div>
+      <input type="text" id="joinName" placeholder="e.g. Priya Sharma" autocomplete="off" onkeydown="if(event.key==='Enter') startChallenge()">
+      <div class="join-error" id="joinError"></div>
+      <button class="btn-primary" onclick="startChallenge()">Start the challenge →</button>
+    </div>
+    <div class="join-meta">Individual activity &nbsp;·&nbsp; 3 minutes &nbsp;·&nbsp; No tools needed</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 2 — CHALLENGE
+══════════════════════════════════════════════════════════════ -->
+<section id="s-challenge" class="screen">
+  <div class="challenge-topbar">
+    <div class="player-tag" id="playerTag">Player</div>
+    <div class="timer-block">
+      <div class="timer-label">Time remaining</div>
+      <div class="timer-num" id="timerNum">3:00</div>
+    </div>
+  </div>
+
+  <div class="challenge-grid">
+
+    <!-- LEFT: situation + quick prompt result -->
+    <div class="challenge-left">
+      <div class="panel-eyebrow">THE QUICK PROMPT RESULT</div>
+
+      <div class="context-card">
+        <div class="context-label">The situation</div>
+        <p>You are on the Genpact account team managing GlobalBank's Finance & Accounting transformation — a 3-year contract, $4.2M ARR. <strong>Tomorrow morning's QBR covers Q4 FY2024 performance, the renewal decision, and 2025 scope expansion.</strong> Your team lead ran an AI prompt at 11pm to build the executive summary dashboard for the client CFO and COO.</p>
+      </div>
+
+      <div class="quick-prompt-card">
+        <div class="qp-label">The prompt used</div>
+        <div class="qp-text">"Build me a QBR dashboard."</div>
+        <div class="qp-meta">5 words &nbsp;·&nbsp; 1 of 5 elements addressed</div>
+      </div>
+
+      <div class="dashboard-frame-label">What it produced ↓</div>
+      <div class="dashboard-frame" id="dashboardA"></div>
+    </div>
+
+    <!-- RIGHT: framework + writing area -->
+    <div class="challenge-right">
+      <div class="panel-eyebrow">YOUR PROMPT</div>
+      <p class="write-desc">Write the prompt you would use to build a better dashboard. Each card below is one element of a well-framed prompt.</p>
+
+      <div class="framework-grid">
+        <div class="element-card el-role">
+          <div class="el-badge">R</div>
+          <div>
+            <div class="el-name">Role</div>
+            <div class="el-hint">What expertise should the AI bring to this task?</div>
+          </div>
+        </div>
+        <div class="element-card el-ctx">
+          <div class="el-badge">C</div>
+          <div>
+            <div class="el-name">Context</div>
+            <div class="el-hint">Who is this for? What's at stake? What decision does it support?</div>
+          </div>
+        </div>
+        <div class="element-card el-ctrl">
+          <div class="el-badge">C</div>
+          <div>
+            <div class="el-name">Control</div>
+            <div class="el-hint">What must the AI NOT include or show?</div>
+          </div>
+        </div>
+        <div class="element-card el-task">
+          <div class="el-badge">T</div>
+          <div>
+            <div class="el-name">Task</div>
+            <div class="el-hint">What exactly needs to be built or produced?</div>
+          </div>
+        </div>
+        <div class="element-card el-out">
+          <div class="el-badge">O</div>
+          <div>
+            <div class="el-name">Output</div>
+            <div class="el-hint">What format, layout, and structure should the result have?</div>
+          </div>
+        </div>
+      </div>
+
+      <textarea id="promptInput" placeholder="Write your prompt here…" oninput="updateWordCount()"></textarea>
+      <div class="writing-footer">
+        <span class="word-count"><span id="wordCount">0</span> words</span>
+        <button class="btn-primary" id="lockBtn" onclick="lockIn()">Lock in my prompt →</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 3 — RESULTS
+══════════════════════════════════════════════════════════════ -->
+<section id="s-results" class="screen">
+  <div class="results-wrap">
+
+    <!-- Score hero -->
+    <div class="score-hero">
+      <div class="score-player" id="scorePlayer">Your result</div>
+      <div class="score-row">
+        <div class="score-number" id="scoreNum">0</div>
+        <div class="score-denom">/100</div>
+      </div>
+      <div class="score-tier" id="scoreTier">—</div>
+    </div>
+
+    <!-- Dimension breakdown -->
+    <div class="dim-section">
+      <div class="section-label">How your prompt scored</div>
+      <div id="dimGrid"></div>
+    </div>
+
+    <!-- Your prompt -->
+    <div class="your-prompt-section">
+      <div class="section-label">Your prompt</div>
+      <div class="your-prompt-text" id="yourPromptText"></div>
+    </div>
+
+    <!-- Expert comparison -->
+    <div class="expert-section">
+      <div class="section-label">What a fully framed prompt looks like</div>
+      <p class="expert-desc">Every element addressed. Same scenario. Same AI.</p>
+
+      <div class="expert-prompt-text">
+        <span class="ep-role">You are a senior Genpact account analyst with expertise in F&amp;A transformation delivery reporting.</span>
+        <span class="ep-ctx"> Build a QBR executive summary dashboard for GlobalBank's Q4 FY2024 review. The audience is the client CFO and COO — they are evaluating contract renewal and 2025 scope expansion. They need to see: SLA attainment against contract thresholds, process savings delivered vs. committed, renewal readiness, and three 2025 scope expansion opportunities.</span>
+        <span class="ep-task"> Structure the dashboard with four sections: a headline KPI row (SLA attainment, process savings, renewal status), a Q1–Q4 SLA performance trend, a renewal readiness checklist with RAG indicators, and a 2025 scope discussion panel with three workstreams.</span>
+        <span class="ep-out"> The layout must be scannable in under 90 seconds and professional enough to share directly with a CFO.</span>
+        <span class="ep-ctrl"> Exclude all internal Genpact operational metrics the client should not see. No raw data tables. Maximum three chart types.</span>
+      </div>
+      <div class="ep-key-row">
+        <span class="ep-key epk-role">R &nbsp;Role</span>
+        <span class="ep-key epk-ctx">C &nbsp;Context</span>
+        <span class="ep-key epk-task">T &nbsp;Task</span>
+        <span class="ep-key epk-out">O &nbsp;Output</span>
+        <span class="ep-key epk-ctrl">C &nbsp;Control</span>
+      </div>
+
+      <div class="dashboard-b-label">What it produced ↓</div>
+      <div class="dashboard-frame" id="dashboardB"></div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-section">
+      <div class="section-label">Leaderboard</div>
+      <div id="lbList"></div>
+      <div class="lb-note">Scores stored on this device only — results are not shared across participants automatically.</div>
+      <button class="btn-secondary" onclick="tryAgain()">Next participant →</button>
+    </div>
+
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+// ─── STATE ────────────────────────────────────────────────────
+var state = { name: '', prompt: '', scores: null, total: 0, timerInterval: null, seconds: 180 };
+
+// ─── STORAGE (localStorage + in-memory fallback) ──────────────
+var memStore = [];
+function storeLoad() {
+  try { return JSON.parse(localStorage.getItem('ff_scores') || '[]'); } catch(e) { return memStore.slice(); }
+}
+function storeSave(arr) {
+  try { localStorage.setItem('ff_scores', JSON.stringify(arr)); } catch(e) { memStore = arr.slice(); }
+}
+
+var BENCHMARKS = [
+  { name: 'Expert prompt · Full framework', score: 92, benchmark: true },
+  { name: 'Solid prompt · 3 of 5 elements', score: 68, benchmark: true },
+  { name: 'Quick prompt · 1 of 5 elements', score: 24, benchmark: true }
+];
+
+// ─── SCORING ENGINE ───────────────────────────────────────────
+var KW = {
+  role: ['you are','act as','as a','as an','expert','senior','analyst','account manager',
+         'consultant','advisor','specialist','account director','lead'],
+  ctx:  ['qbr','quarterly','quarterly business','globalbank','bank','client','account',
+         'finance','f&a','transformation','meeting','review','cfo','coo','stakeholder',
+         'audience','executive','renewal','contract','q4','fy2024','2025','presenter'],
+  ctrl: ["avoid","don't","do not","must not","not include","exclude","no raw","no internal",
+         "without","limit to","no more than","guardrail","constraint","only","confidential",
+         "must only","keep out","sensitive","omit","never include"],
+  task: ['build','create','design','generate','make','produce','include','show','display',
+         'dashboard','summary','report','overview','section','visualise','visualize',
+         'structure','organise','organize','layout'],
+  out:  ['format','layout','section','visual','chart','table','card','tile','scannable',
+         'scan','90 second','2 minute','professional','clean','clear','one screen',
+         'single screen','single page','hierarchy','header','row','column']
+};
+
+function countHits(text, kws) {
+  var t = text.toLowerCase(), c = 0;
+  kws.forEach(function(k) { if (t.indexOf(k) >= 0) c++; });
+  return c;
+}
+
+function scorePrompt(text) {
+  var r = countHits(text, KW.role);
+  var c = countHits(text, KW.ctx);
+  var ctrl = countHits(text, KW.ctrl);
+  var t = countHits(text, KW.task);
+  var o = countHits(text, KW.out);
+
+  function toScore(hits, den) { return Math.round(Math.min(hits / den, 1) * 20); }
+
+  return {
+    role:    toScore(r,    2),
+    context: toScore(c,    4),
+    control: toScore(ctrl, 2),
+    task:    toScore(t,    4),
+    output:  toScore(o,    4)
+  };
+}
+
+function getTier(total) {
+  if (total >= 85) return { label: 'Expert framing', bg: '#D1FAE5', color: '#065F46' };
+  if (total >= 65) return { label: 'Strong framing',  bg: '#DBEAFE', color: '#1D4ED8' };
+  if (total >= 45) return { label: 'Developing',      bg: '#FEF3C7', color: '#B45309' };
+  if (total >= 25) return { label: 'Quick start',     bg: '#FFE4E6', color: '#BE123C' };
+  return                   { label: 'Quick prompt',   bg: '#F3F4F6', color: '#6B7280' };
+}
+
+var DIM_CFG = [
+  { key: 'role',    letter: 'R', name: 'Role',    badge: 'var(--el-role-badge)',
+    tip_miss: 'Assign the AI a specific expertise — "You are a senior Genpact account analyst…"',
+    tip_part: 'Good start — be more specific about the domain expertise you need.',
+    tip_strong: 'The AI knew exactly what professional lens to apply.' },
+  { key: 'context', letter: 'C', name: 'Context', badge: 'var(--el-ctx-badge)',
+    tip_miss: 'Name the audience, the account, and the decision this dashboard must support.',
+    tip_part: 'Some context present — name the CFO/COO audience and the renewal decision explicitly.',
+    tip_strong: 'Business stakes and audience were clearly established.' },
+  { key: 'control', letter: 'C', name: 'Control', badge: 'var(--el-ctrl-badge)',
+    tip_miss: 'Add guardrails — what should the AI NOT show? (e.g. internal metrics, raw data)',
+    tip_part: 'Some constraints set — be explicit about what must stay out of this client-facing output.',
+    tip_strong: 'Your guardrails would have kept the AI focused on what the client needs to see.' },
+  { key: 'task',    letter: 'T', name: 'Task',    badge: 'var(--el-task-badge)',
+    tip_miss: 'Specify what to build and what sections to include — go beyond "dashboard".',
+    tip_part: 'Task defined — name the specific sections (KPI row, trend, renewal status, scope).',
+    tip_strong: 'The task was specific enough that the AI could build the right thing first time.' },
+  { key: 'output',  letter: 'O', name: 'Output',  badge: 'var(--el-out-badge)',
+    tip_miss: 'Describe what the result should look and feel like — layout, scannability, format.',
+    tip_part: 'Some output guidance — add how it should read (scannable, professional, one screen).',
+    tip_strong: 'You defined what the output should feel like to its reader — CFO-ready.' }
+];
+
+// ─── SVG DASHBOARDS ───────────────────────────────────────────
+function dashboardASVG() {
+  return `<svg viewBox="0 0 420 356" xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
+  <rect width="420" height="356" fill="#F8FAFB"/>
+  <!-- Header -->
+  <rect width="420" height="46" fill="#E5E7EB"/>
+  <text x="16" y="20" font-size="11" font-weight="700" fill="#374151">Q4 FY24 Dashboard</text>
+  <text x="16" y="36" font-size="9" fill="#9CA3AF">Auto-generated</text>
+  <text x="390" y="28" font-size="9" fill="#9CA3AF" text-anchor="end">Nov 2024</text>
+  <!-- KPI row -->
+  <rect x="12" y="58" width="122" height="66" rx="6" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="20" y="73" font-size="8" fill="#9CA3AF">Total Revenue</text>
+  <text x="20" y="96" font-size="22" font-weight="700" fill="#374151">£4.2M</text>
+  <text x="20" y="112" font-size="8" fill="#9CA3AF">period total</text>
+  <rect x="148" y="58" width="122" height="66" rx="6" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="156" y="73" font-size="8" fill="#9CA3AF">Operating Cost</text>
+  <text x="156" y="96" font-size="22" font-weight="700" fill="#374151">£3.1M</text>
+  <text x="156" y="112" font-size="8" fill="#9CA3AF">year to date</text>
+  <rect x="284" y="58" width="124" height="66" rx="6" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="292" y="73" font-size="8" fill="#9CA3AF">Net Margin</text>
+  <text x="292" y="96" font-size="22" font-weight="700" fill="#374151">26.2%</text>
+  <text x="292" y="112" font-size="8" fill="#9CA3AF">overall figure</text>
+  <!-- Bar chart -->
+  <rect x="12" y="136" width="244" height="136" rx="6" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="22" y="152" font-size="10" font-weight="600" fill="#374151">Performance</text>
+  <line x1="22" y1="230" x2="244" y2="230" stroke="#E5E7EB" stroke-width="1"/>
+  <rect x="38"  y="193" width="34" height="37" rx="3" fill="#CBD5E1"/>
+  <text x="45"  y="242" font-size="8" fill="#9CA3AF">Q1</text>
+  <rect x="94"  y="183" width="34" height="47" rx="3" fill="#CBD5E1"/>
+  <text x="101" y="242" font-size="8" fill="#9CA3AF">Q2</text>
+  <rect x="150" y="200" width="34" height="30" rx="3" fill="#CBD5E1"/>
+  <text x="157" y="242" font-size="8" fill="#9CA3AF">Q3</text>
+  <rect x="206" y="188" width="34" height="42" rx="3" fill="#CBD5E1"/>
+  <text x="213" y="242" font-size="8" fill="#9CA3AF">Q4</text>
+  <text x="22" y="262" font-size="8" fill="#9CA3AF">No axis labels · No target reference · No context</text>
+  <!-- Right panel filler -->
+  <rect x="268" y="136" width="140" height="136" rx="6" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="278" y="156" font-size="10" font-weight="600" fill="#374151">SLA Status</text>
+  <text x="278" y="176" font-size="9" fill="#9CA3AF">Process A</text>
+  <text x="348" y="176" font-size="9" font-weight="600" fill="#374151">98%</text>
+  <line x1="278" y1="182" x2="396" y2="182" stroke="#F3F4F6"/>
+  <text x="278" y="196" font-size="9" fill="#9CA3AF">Process B</text>
+  <text x="348" y="196" font-size="9" font-weight="600" fill="#374151">87%</text>
+  <line x1="278" y1="202" x2="396" y2="202" stroke="#F3F4F6"/>
+  <text x="278" y="216" font-size="9" fill="#9CA3AF">Process C</text>
+  <text x="348" y="216" font-size="9" font-weight="600" fill="#374151">94%</text>
+  <text x="278" y="258" font-size="8" fill="#D1D5DB">No renewal view</text>
+  <!-- Bottom table -->
+  <rect x="12" y="284" width="396" height="62" rx="6" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="22" y="302" font-size="10" font-weight="600" fill="#374151">Data Table</text>
+  <line x1="12" y1="308" x2="408" y2="308" stroke="#E5E7EB"/>
+  <text x="22"  y="323" font-size="9" fill="#6B7280">Row 1</text>
+  <text x="120" y="323" font-size="9" fill="#6B7280">Value A</text>
+  <text x="220" y="323" font-size="9" fill="#6B7280">Value B</text>
+  <text x="320" y="323" font-size="9" fill="#6B7280">Value C</text>
+  <text x="22"  y="338" font-size="9" fill="#6B7280">Row 2</text>
+  <text x="120" y="338" font-size="9" fill="#6B7280">Value D</text>
+  <text x="220" y="338" font-size="9" fill="#6B7280">Value E</text>
+  <text x="320" y="338" font-size="9" fill="#6B7280">Value F</text>
+</svg>`;
+}
+
+function dashboardBSVG() {
+  return `<svg viewBox="0 0 420 452" xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
+  <rect width="420" height="452" fill="#F8FAFB" rx="4"/>
+  <!-- Dark header band -->
+  <rect width="420" height="54" rx="4" fill="#172A3A"/>
+  <rect x="0" y="40" width="420" height="14" fill="#172A3A"/>
+  <text x="16" y="21" font-size="9" font-weight="700" fill="rgba(255,255,255,0.55)" letter-spacing="1">GLOBALBANK · Q4 FY2024</text>
+  <text x="16" y="40" font-size="14" font-weight="700" fill="white">QBR Executive Summary</text>
+  <rect x="344" y="10" width="62" height="18" rx="9" fill="rgba(255,255,255,0.12)"/>
+  <text x="375" y="22" font-size="9" font-weight="600" fill="rgba(255,255,255,0.7)" text-anchor="middle">CONFIDENTIAL</text>
+  <!-- KPI row -->
+  <rect x="12" y="66" width="124" height="74" rx="7" fill="white" stroke="#E5E7EB"/>
+  <text x="20" y="82" font-size="8" font-weight="700" fill="#6B7280" letter-spacing="0.8">SLA ATTAINMENT</text>
+  <text x="20" y="108" font-size="26" font-weight="700" fill="#065F46">94.2%</text>
+  <rect x="20" y="116" width="54" height="15" rx="7" fill="#D1FAE5"/>
+  <text x="47" y="127" font-size="8" font-weight="700" fill="#065F46" text-anchor="middle">ON TARGET</text>
+  <rect x="148" y="66" width="124" height="74" rx="7" fill="white" stroke="#E5E7EB"/>
+  <text x="156" y="82" font-size="8" font-weight="700" fill="#6B7280" letter-spacing="0.8">PROCESS SAVINGS</text>
+  <text x="156" y="108" font-size="26" font-weight="700" fill="#1D4ED8">£2.8M</text>
+  <rect x="156" y="116" width="66" height="15" rx="7" fill="#DBEAFE"/>
+  <text x="189" y="127" font-size="8" font-weight="700" fill="#1D4ED8" text-anchor="middle">vs £2.5M TARGET</text>
+  <rect x="284" y="66" width="124" height="74" rx="7" fill="white" stroke="#E5E7EB"/>
+  <text x="292" y="82" font-size="8" font-weight="700" fill="#6B7280" letter-spacing="0.8">RENEWAL STATUS</text>
+  <text x="292" y="108" font-size="22" font-weight="700" fill="#065F46">ON TRACK</text>
+  <rect x="292" y="116" width="66" height="15" rx="7" fill="#D1FAE5"/>
+  <text x="325" y="127" font-size="8" font-weight="700" fill="#065F46" text-anchor="middle">JAN 2025 CLOSE</text>
+  <!-- SLA Trend chart -->
+  <rect x="12" y="152" width="244" height="138" rx="7" fill="white" stroke="#E5E7EB"/>
+  <text x="22" y="168" font-size="10" font-weight="600" fill="#374151">SLA Performance Q1–Q4</text>
+  <text x="22" y="181" font-size="8" fill="#9CA3AF">Contract threshold: 95%</text>
+  <!-- Target line dashed -->
+  <line x1="30" y1="216" x2="244" y2="216" stroke="#E5E7EB" stroke-dasharray="4,3" stroke-width="1.5"/>
+  <text x="232" y="212" font-size="8" fill="#9CA3AF" text-anchor="end">95% target</text>
+  <!-- Bars -->
+  <rect x="38"  y="222" width="34" height="30" rx="3" fill="#93C5FD"/>
+  <text x="55"  y="263" font-size="8" fill="#6B7280" text-anchor="middle">Q1</text>
+  <text x="55"  y="220" font-size="8" fill="#6B7280" text-anchor="middle">91%</text>
+  <rect x="94"  y="216" width="34" height="36" rx="3" fill="#93C5FD"/>
+  <text x="111" y="263" font-size="8" fill="#6B7280" text-anchor="middle">Q2</text>
+  <text x="111" y="214" font-size="8" fill="#6B7280" text-anchor="middle">93%</text>
+  <rect x="150" y="212" width="34" height="40" rx="3" fill="#93C5FD"/>
+  <text x="167" y="263" font-size="8" fill="#6B7280" text-anchor="middle">Q3</text>
+  <text x="167" y="210" font-size="8" fill="#6B7280" text-anchor="middle">94%</text>
+  <rect x="206" y="210" width="34" height="42" rx="3" fill="#2563EB"/>
+  <text x="223" y="263" font-size="8" font-weight="600" fill="#2563EB" text-anchor="middle">Q4</text>
+  <text x="223" y="208" font-size="8" font-weight="700" fill="#2563EB" text-anchor="middle">94.2%</text>
+  <text x="22" y="282" font-size="8" fill="#6B7280">Trajectory: improving. 0.8pp below threshold → within managed range.</text>
+  <!-- Renewal readiness -->
+  <rect x="268" y="152" width="140" height="138" rx="7" fill="#F0FDF4" stroke="#BBF7D0"/>
+  <text x="278" y="168" font-size="10" font-weight="700" fill="#065F46">Renewal Readiness</text>
+  <circle cx="284" cy="192" r="5" fill="#22C55E"/>
+  <text x="295" y="196" font-size="9" fill="#374151">SLA threshold met</text>
+  <circle cx="284" cy="212" r="5" fill="#22C55E"/>
+  <text x="295" y="216" font-size="9" fill="#374151">Savings target exceeded</text>
+  <circle cx="284" cy="232" r="5" fill="#22C55E"/>
+  <text x="295" y="236" font-size="9" fill="#374151">No open escalations</text>
+  <circle cx="284" cy="252" r="5" fill="#FCD34D"/>
+  <text x="295" y="256" font-size="9" fill="#374151">2025 scope: TBC</text>
+  <rect x="278" y="268" width="120" height="16" rx="8" fill="#D1FAE5"/>
+  <text x="338" y="279" font-size="9" font-weight="700" fill="#065F46" text-anchor="middle">RENEWAL RECOMMENDED</text>
+  <!-- 2025 scope panel -->
+  <rect x="12" y="302" width="396" height="104" rx="7" fill="white" stroke="#E5E7EB"/>
+  <text x="22" y="318" font-size="10" font-weight="600" fill="#374151">2025 Scope Discussion</text>
+  <text x="22" y="331" font-size="8" fill="#9CA3AF">Three expansion workstreams ready for discussion</text>
+  <!-- Workstream cards -->
+  <rect x="20"  y="339" width="118" height="56" rx="6" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="29"  y="354" font-size="9" font-weight="700" fill="#4338CA">AP Automation</text>
+  <text x="29"  y="368" font-size="8" fill="#6B7280">+£0.4M scope</text>
+  <text x="29"  y="380" font-size="8" fill="#6B7280">Ready to mobilise</text>
+  <rect x="150" y="339" width="118" height="56" rx="6" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="159" y="354" font-size="9" font-weight="700" fill="#4338CA">Reporting Uplift</text>
+  <text x="159" y="368" font-size="8" fill="#6B7280">+£0.3M scope</text>
+  <text x="159" y="380" font-size="8" fill="#6B7280">Proposal ready</text>
+  <rect x="280" y="339" width="118" height="56" rx="6" fill="#FEF9C3" stroke="#FDE68A"/>
+  <text x="289" y="354" font-size="9" font-weight="700" fill="#B45309">Tax Compliance</text>
+  <text x="289" y="368" font-size="8" fill="#6B7280">+£0.5M scope</text>
+  <text x="289" y="380" font-size="8" fill="#B45309">Needs discussion</text>
+  <!-- Footer -->
+  <rect x="0" y="414" width="420" height="38" fill="#F3F4F6" rx="4"/>
+  <text x="16" y="437" font-size="8" fill="#9CA3AF">Genpact F&amp;A Transformation · GlobalBank · QBR Q4 FY2024 · Confidential · For client use only</text>
+</svg>`;
+}
+
+// ─── SCREEN NAVIGATION ────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ─── JOIN ─────────────────────────────────────────────────────
+function startChallenge() {
+  var name = document.getElementById('joinName').value.trim();
+  if (!name) {
+    document.getElementById('joinError').textContent = 'Please enter your name to begin.';
+    return;
+  }
+  document.getElementById('joinError').textContent = '';
+  state.name = name;
+
+  document.getElementById('playerTag').textContent = name;
+  document.getElementById('dashboardA').innerHTML = dashboardASVG();
+
+  showScreen('s-challenge');
+  startTimer();
+}
+
+// ─── TIMER ────────────────────────────────────────────────────
+function startTimer() {
+  state.seconds = 180;
+  updateTimerDisplay();
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(function() {
+    state.seconds--;
+    updateTimerDisplay();
+    if (state.seconds <= 0) {
+      clearInterval(state.timerInterval);
+      lockIn();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  var el = document.getElementById('timerNum');
+  var m = Math.floor(Math.max(0, state.seconds) / 60);
+  var s = Math.max(0, state.seconds) % 60;
+  el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  el.className = 'timer-num' + (state.seconds <= 0 ? ' expired' : state.seconds <= 30 ? ' urgent' : state.seconds <= 60 ? ' warn' : '');
+}
+
+// ─── WORD COUNT ───────────────────────────────────────────────
+function updateWordCount() {
+  var text = document.getElementById('promptInput').value.trim();
+  var wc = text ? text.split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = wc;
+}
+
+// ─── LOCK IN ──────────────────────────────────────────────────
+function lockIn() {
+  clearInterval(state.timerInterval);
+  var prompt = document.getElementById('promptInput').value.trim();
+  if (!prompt) prompt = '(no prompt entered — time expired)';
+  state.prompt = prompt;
+
+  var scores = scorePrompt(prompt);
+  state.scores = scores;
+  var total = scores.role + scores.context + scores.control + scores.task + scores.output;
+  state.total = total;
+
+  // Save to leaderboard
+  var entries = storeLoad();
+  entries.push({ name: state.name, score: total, ts: Date.now() });
+  storeSave(entries);
+
+  renderResults();
+  showScreen('s-results');
+
+  // Animate score
+  var obj = { val: 0 };
+  if (typeof gsap !== 'undefined') {
+    gsap.to(obj, { val: total, duration: 1.2, ease: 'power2.out', onUpdate: function() {
+      document.getElementById('scoreNum').textContent = Math.round(obj.val);
+    }});
+  } else {
+    document.getElementById('scoreNum').textContent = total;
+  }
+}
+
+// ─── RENDER RESULTS ───────────────────────────────────────────
+function renderResults() {
+  var total = state.total;
+  var scores = state.scores;
+  var tier = getTier(total);
+
+  document.getElementById('scorePlayer').textContent = state.name + ' · Your result';
+  document.getElementById('scoreTier').textContent = tier.label;
+  document.getElementById('scoreTier').style.background = tier.bg;
+  document.getElementById('scoreTier').style.color = tier.color;
+  document.getElementById('yourPromptText').textContent = '“' + state.prompt + '”';
+
+  // Dimension bars
+  var grid = document.getElementById('dimGrid');
+  grid.innerHTML = '';
+  DIM_CFG.forEach(function(d) {
+    var pts = scores[d.key];
+    var pct = Math.round((pts / 20) * 100);
+    var tip = pts >= 15 ? d.tip_strong : pts >= 8 ? d.tip_part : d.tip_miss;
+    var barColor = pts >= 15 ? '#22C55E' : pts >= 8 ? '#F59E0B' : '#E5E7EB';
+    grid.innerHTML += `
+      <div class="dim-row">
+        <div class="dim-header">
+          <div class="dim-name">
+            <div class="dim-badge" style="background:${d.badge}">${d.letter}</div>
+            ${d.name}
+          </div>
+          <div class="dim-pts">${pts} / 20</div>
+        </div>
+        <div class="dim-bar-bg">
+          <div class="dim-bar-fill" style="width:${pct}%; background:${barColor}"></div>
+        </div>
+        <div class="dim-tip">${tip}</div>
+      </div>`;
+  });
+
+  // Expert dashboard
+  document.getElementById('dashboardB').innerHTML = dashboardBSVG();
+
+  // Leaderboard
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  var entries = storeLoad();
+  entries = entries.filter(function(e) { return !e.benchmark; });
+  var combined = entries.concat(BENCHMARKS);
+  combined.sort(function(a, b) { return b.score - a.score; });
+  var top = combined.slice(0, 8);
+
+  var html = '';
+  var rankColors = ['gold', 'silver', 'bronze'];
+  top.forEach(function(e, i) {
+    var isCurrent = !e.benchmark && e.name === state.name && entries.filter(function(x){ return x.name === state.name; }).length > 0;
+    var rankClass = 'lb-rank' + (rankColors[i] ? ' ' + rankColors[i] : '');
+    var nameClass = 'lb-name' + (e.benchmark ? ' benchmark' : '');
+    var scoreClass = 'lb-score' + (i === 0 ? ' top' : '');
+    var youBadge = isCurrent ? ' <span class="lb-you">you</span>' : '';
+    html += `<div class="lb-row">
+      <div class="${rankClass}">${i+1}</div>
+      <div class="${nameClass}">${e.name}${youBadge}</div>
+      <div class="${scoreClass}">${e.score}</div>
+    </div>`;
+  });
+  document.getElementById('lbList').innerHTML = html;
+}
+
+// ─── TRY AGAIN ────────────────────────────────────────────────
+function tryAgain() {
+  document.getElementById('joinName').value = '';
+  document.getElementById('promptInput').value = '';
+  document.getElementById('wordCount').textContent = '0';
+  state = { name: '', prompt: '', scores: null, total: 0, timerInterval: null, seconds: 180 };
+  showScreen('s-join');
+}
+</script>
+</body>
+</html>
