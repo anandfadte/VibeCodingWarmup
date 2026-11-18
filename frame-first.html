@@ -44,13 +44,8 @@ body {
 .screen.active { display: block; }
 
 /* ─── JOIN ─────────────────────────────────────────────────── */
-#s-join {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 16px;
-}
+#s-join { min-height: 100vh; padding: 32px 16px; }
+#s-join.active { display: flex; align-items: center; justify-content: center; }
 .join-wrap { max-width: 480px; width: 100%; text-align: center; }
 
 .eyebrow {
@@ -129,7 +124,8 @@ body {
 .join-meta { font-size: 11px; color: var(--muted-2); margin-top: 20px; letter-spacing: 0.03em; }
 
 /* ─── CHALLENGE ────────────────────────────────────────────── */
-#s-challenge { min-height: 100vh; display: flex; flex-direction: column; }
+#s-challenge { min-height: 100vh; }
+#s-challenge.active { display: flex; flex-direction: column; }
 
 .challenge-topbar {
   display: flex;
