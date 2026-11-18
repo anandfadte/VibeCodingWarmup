@@ -983,8 +983,8 @@ function lockIn() {
   var total = scores.role + scores.context + scores.control + scores.task + scores.output;
   state.total = total;
 
-  // Save to leaderboard
-  var entries = storeLoad();
+  // Save to leaderboard (replace any prior entry for this name)
+  var entries = storeLoad().filter(function(e) { return e.name !== state.name; });
   entries.push({ name: state.name, score: total, ts: Date.now() });
   storeSave(entries);
 
