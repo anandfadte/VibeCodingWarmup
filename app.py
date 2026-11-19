@@ -14,7 +14,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 #MainMenu, footer, header { visibility: hidden; }
-.block-container { max-width: 860px; padding: 1.5rem 1rem 4rem; }
+.block-container { max-width: 1100px; padding: 1.5rem 1rem 4rem; }
 div[data-testid="metric-container"] > div { font-size: 13px; }
 </style>
 """, unsafe_allow_html=True)
@@ -275,51 +275,73 @@ for k, v in [("screen","input"),("name",""),("prompt",""),("result",None),("api_
 # ── Screen: Input ─────────────────────────────────────────────────────────────
 def show_input():
     st.markdown("""
-<div style="text-align:center;padding:36px 0 20px;">
-  <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">
-    FRAME FIRST · AI FOR VIBE CODING · GENPACT
+<div style="text-align:center;padding:20px 0 16px;">
+  <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">
+    WARM-UP · AI FOR VIBE CODING · GENPACT APPLIED AI STUDIO
   </div>
-  <h1 style="font-size:30px;font-weight:700;color:#0f172a;margin:0 0 8px;">Write your AI prompt.</h1>
-  <p style="color:#6b7280;font-size:14px;margin:0;">
-    For the QBR dashboard task. Lock in when ready — 5 dimensions scored instantly.
-  </p>
+  <h1 style="font-size:32px;font-weight:800;color:#0f172a;margin:0 0 4px;">Frame <em style="color:#6366f1;">First.</em></h1>
 </div>
 """, unsafe_allow_html=True)
 
-    st.markdown("""
-<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:16px 20px;margin:0 0 18px;">
-  <div style="font-size:11px;color:#0369a1;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
-    THE SITUATION
-  </div>
-  <p style="color:#0f172a;font-size:14px;margin:0 0 6px;line-height:1.6;">
-    You are on the <strong>Genpact account team</strong> managing GlobalBank's Finance &amp; Accounting transformation —
-    a 3-year contract, $4.2M ARR. Tomorrow morning's QBR covers <strong>Q4 FY2024 performance,
-    the renewal decision, and 2025 scope expansion.</strong>
-  </p>
-  <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">
-    Your team lead used a 4-word AI prompt to build the dashboard. It produced something generic.
-    <strong>Write a better one.</strong> Use the 5 dimensions below as your guide — the AI will score your prompt instantly.
+    left_col, right_col = st.columns([1, 1])
+
+    with left_col:
+        st.markdown("""
+<div style="background:#f8fafc;border-radius:10px;padding:15px 18px;margin-bottom:10px;">
+  <div style="font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;">THE SITUATION</div>
+  <p style="color:#0f172a;font-size:13px;margin:0;line-height:1.6;">
+    You are on the <strong>Genpact account team</strong> managing GlobalBank's Finance &amp; Accounting
+    transformation — a 3-year contract, $4.2M ARR.
+    <strong>Tomorrow morning's QBR covers Q4 FY2024 performance, the renewal decision, and 2025 scope expansion.</strong>
+    Your team lead ran an AI prompt at 11pm to build the executive summary dashboard for the client CFO and COO.
   </p>
 </div>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-  <span style="background:#ede9fe;color:#5b21b6;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">R — Role</span>
-  <span style="background:#dbeafe;color:#1e40af;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">C — Context</span>
-  <span style="background:#fce7f3;color:#9d174d;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">C — Control</span>
-  <span style="background:#fef3c7;color:#92400e;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">T — Task</span>
-  <span style="background:#dcfce7;color:#166534;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">O — Output</span>
+<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:13px 16px;margin-bottom:10px;">
+  <div style="font-size:10px;color:#b45309;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">THE PROMPT USED</div>
+  <div style="font-size:18px;font-weight:700;font-style:italic;color:#1e293b;margin-bottom:4px;">"Build me a QBR dashboard."</div>
+  <div style="font-size:11px;color:#9ca3af;">5 words &nbsp;·&nbsp; 1 of 5 elements addressed</div>
+</div>
+<div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600;">WHAT IT PRODUCED ↓</div>
+""", unsafe_allow_html=True)
+        components.html(EXEC_DASH, height=270)
+
+    with right_col:
+        st.markdown("""
+<p style="color:#374151;font-size:13px;margin:0 0 10px;line-height:1.5;">
+  Write the prompt you would use to build a better dashboard — each card below is one element
+  of a well-framed prompt. Hit <strong>Lock in</strong> when ready.
+</p>
+<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;">
+  <div style="background:#ede9fe;border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px;">
+    <span style="background:#7c3aed;color:white;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">R</span>
+    <div><div style="font-size:13px;font-weight:600;color:#1e1b4b;">Role</div><div style="font-size:11px;color:#5b21b6;">What expertise should the AI bring to this task?</div></div>
+  </div>
+  <div style="background:#dbeafe;border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px;">
+    <span style="background:#2563eb;color:white;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">C</span>
+    <div><div style="font-size:13px;font-weight:600;color:#1e3a8a;">Context</div><div style="font-size:11px;color:#1d4ed8;">Who is this for? What's at stake? What decision does it support?</div></div>
+  </div>
+  <div style="background:#fce7f3;border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px;">
+    <span style="background:#db2777;color:white;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">C</span>
+    <div><div style="font-size:13px;font-weight:600;color:#831843;">Control</div><div style="font-size:11px;color:#9d174d;">What must the AI NOT include or show?</div></div>
+  </div>
+  <div style="background:#fef3c7;border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px;">
+    <span style="background:#d97706;color:white;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">T</span>
+    <div><div style="font-size:13px;font-weight:600;color:#78350f;">Task</div><div style="font-size:11px;color:#92400e;">What exactly needs to be built or produced?</div></div>
+  </div>
+  <div style="background:#dcfce7;border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px;">
+    <span style="background:#16a34a;color:white;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">O</span>
+    <div><div style="font-size:13px;font-weight:600;color:#14532d;">Output</div><div style="font-size:11px;color:#166534;">What format, layout, and structure should the result have?</div></div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
-    with st.form("input_form"):
-        name   = st.text_input("Your name", placeholder="Enter your name")
-        prompt = st.text_area("Your prompt",
-                              placeholder="Write your AI prompt for a QBR dashboard...",
-                              height=130)
-        st.caption(f"{len(prompt)} characters")
-
-        _, col_btn = st.columns([2, 1])
-        with col_btn:
-            submitted = st.form_submit_button("🔒 Lock In", type="primary", use_container_width=True)
+        with st.form("input_form"):
+            name   = st.text_input("Your name", placeholder="e.g. Priya Sharma")
+            prompt = st.text_area("Your prompt",
+                                  placeholder="Write your prompt here... e.g. 'You are a senior Genpact analyst. Build a QBR executive summary for GlobalBank...'",
+                                  height=140)
+            st.caption(f"{len(prompt)} characters")
+            submitted = st.form_submit_button("🔒 Lock in my prompt →", type="primary", use_container_width=True)
 
     if submitted:
         if not name.strip():
