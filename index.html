@@ -1321,11 +1321,18 @@ async function lockIn() {
     state.aiFeedback = null;
     state.aiOutput   = '';
     state.gap        = null;
+    state.dashboard  = null;
   }
 
   state.scores = scores;
   var total = scores.role + scores.context + scores.control + scores.task + scores.output;
   state.total = total;
+
+  // Always set dashboard quality from final score (covers both AI and keyword paths)
+  var allHigh = scores.role >= 14 && scores.context >= 14 && scores.control >= 14 && scores.task >= 14 && scores.output >= 14;
+  var qualityTier = (total >= 85 && allHigh) ? 'executive' : (total >= 55) ? 'structured' : (total >= 25) ? 'partial' : 'minimal';
+  if (!state.dashboard) state.dashboard = {};
+  state.dashboard.quality = qualityTier;
 
   // Save to leaderboard (replace any prior entry for this name)
   var entries = storeLoad().filter(function(e) { return e.name !== state.name; });
