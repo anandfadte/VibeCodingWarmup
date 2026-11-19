@@ -540,6 +540,8 @@ body {
 .comp-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; align-self: flex-start; }
 .comp-badge.before { background: #FEE2E2; color: #991B1B; }
 .comp-badge.after { background: #D1FAE5; color: #065F46; }
+.comp-badge.structured { background: #DBEAFE; color: #1D4ED8; }
+.comp-badge.partial-badge { background: #FEF3C7; color: #B45309; }
 .comp-col-quote { font-size: 13px; color: var(--muted); font-style: italic; }
 .comp-divider { display: flex; align-items: flex-start; justify-content: center; padding-top: 48px; font-size: 24px; color: var(--muted); }
 .expert-prompt-reveal { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px; }
@@ -740,11 +742,11 @@ body {
         <!-- Arrow divider -->
         <div class="comp-divider">→</div>
 
-        <!-- Right: expert prompt result -->
+        <!-- Right: participant's prompt result (dynamic) -->
         <div class="comparison-col">
           <div class="comp-col-header">
-            <div class="comp-badge after">All 5 elements (RCTO+C)</div>
-            <div class="comp-col-quote">Role · Context · Task · Output · Control</div>
+            <div class="comp-badge after" id="yourDashBadge">Your prompt result</div>
+            <div class="comp-col-quote" id="yourDashLabel"></div>
           </div>
           <div class="dashboard-frame" id="dashboardB"></div>
         </div>
@@ -774,10 +776,8 @@ body {
     <div class="leaderboard-section">
       <div class="section-label">Leaderboard</div>
       <div id="lbList"></div>
-      <div class="lb-note">Scores stored on this device only — results are not shared across participants automatically.</div>
       <div class="results-btn-row">
-        <button class="btn-back" onclick="goBack()">← Try again</button>
-        <button class="btn-secondary" onclick="tryAgain()">Next participant →</button>
+        <button class="btn-back" onclick="goBack()">← Refine my prompt</button>
       </div>
     </div>
 
@@ -787,15 +787,11 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 // ─── API CONFIGURATION ────────────────────────────────────────
-var API_KEY = (function() {
-  var h = window.location.hash + '&' + window.location.search;
-  var m = h.match(/[?#&]key=([^&#]+)/);
-  return m ? decodeURIComponent(m[1]) : '';
-})();
-var AI_MODE = API_KEY.length > 10;
+var API_KEY = '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';
+var AI_MODE = true;
 
 // ─── STATE ────────────────────────────────────────────────────
-var state = { name: '', prompt: '', scores: null, total: 0, timerInterval: null, seconds: 180, aiFeedback: null, aiOutput: '', gap: null };
+var state = { name: '', prompt: '', scores: null, total: 0, timerInterval: null, seconds: 180, aiFeedback: null, aiOutput: '', gap: null, dashboard: null };
 
 // ─── STORAGE (localStorage + in-memory fallback) ──────────────
 var memStore = [];
@@ -847,10 +843,10 @@ function scorePrompt(text) {
 
   return {
     role:    toScore(r,    2),
-    context: toScore(c,    4),
+    context: toScore(c,    3),
     control: toScore(ctrl, 2),
-    task:    toScore(t,    4),
-    output:  toScore(o,    4)
+    task:    toScore(t,    3),
+    output:  toScore(o,    3)
   };
 }
 
@@ -886,6 +882,162 @@ var DIM_CFG = [
 ];
 
 // ─── SVG DASHBOARDS ───────────────────────────────────────────
+// ─── XML ESCAPE ───────────────────────────────────────────────
+function escapeXML(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── DYNAMIC DASHBOARD RENDERER ───────────────────────────────
+function renderDynamicDashboard(data) {
+  if (!data) return dashboardBSVG();
+  var q = data.quality || 'minimal';
+  if (q === 'executive') return dashboardBSVG();
+
+  var title = escapeXML((data.title || 'Dashboard').substring(0, 44));
+  var subtitle = escapeXML((data.subtitle || '').substring(0, 60));
+  var darkHdr = data.dark_header && q !== 'minimal';
+  var kpis = Array.isArray(data.kpis) ? data.kpis : [];
+  var hdrBg = darkHdr ? '#172A3A' : '#9CA3AF';
+  var hdrFg = 'white';
+  var hdrSub = darkHdr ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.65)';
+  var sColor = { good:'#065F46', warn:'#B45309', bad:'#991B1B', unknown:'#6B7280' };
+  var sBg    = { good:'#D1FAE5', warn:'#FEF3C7', bad:'#FEE2E2', unknown:'#F3F4F6' };
+
+  var s = '<svg viewBox="0 0 420 452" xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">'
+    + '<rect width="420" height="452" fill="#F8FAFB" rx="4"/>'
+    + '<rect width="420" height="54" rx="4" fill="' + hdrBg + '"/>'
+    + '<rect x="0" y="40" width="420" height="14" fill="' + hdrBg + '"/>';
+
+  if (subtitle) {
+    s += '<text x="16" y="21" font-size="9" font-weight="700" fill="' + hdrSub + '" letter-spacing="1">' + subtitle.toUpperCase() + '</text>';
+  } else {
+    s += '<text x="16" y="21" font-size="9" fill="' + hdrSub + '">No context specified</text>';
+  }
+  s += '<text x="16" y="40" font-size="14" font-weight="700" fill="' + hdrFg + '">' + title + '</text>';
+
+  // KPI row — show actual KPIs up to 3, rest as placeholders
+  var kpiShow = q === 'minimal' ? [] : kpis.slice(0, 3);
+  var placeholders = 3 - kpiShow.length;
+  kpiShow.forEach(function(k, i) {
+    var x = 12 + i * 136;
+    var sc = sColor[k.status] || sColor.unknown;
+    var sb = sBg[k.status] || sBg.unknown;
+    var lbl = escapeXML((k.label||'KPI').substring(0,16).toUpperCase());
+    var val = escapeXML((k.value||'—').substring(0,12));
+    var bdg = escapeXML((k.badge||'').substring(0,18));
+    s += '<rect x="' + x + '" y="66" width="124" height="74" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="' + (x+8) + '" y="82" font-size="8" font-weight="700" fill="#6B7280" letter-spacing="0.8">' + lbl + '</text>'
+      + '<text x="' + (x+8) + '" y="108" font-size="22" font-weight="700" fill="' + sc + '">' + val + '</text>';
+    if (bdg) {
+      var bw = Math.min(bdg.length * 6 + 8, 110);
+      s += '<rect x="' + (x+8) + '" y="116" width="' + bw + '" height="15" rx="7" fill="' + sb + '"/>'
+        + '<text x="' + (x+8+bw/2) + '" y="127" font-size="8" font-weight="700" fill="' + sc + '" text-anchor="middle">' + bdg + '</text>';
+    }
+  });
+  for (var p = 0; p < (q === 'minimal' ? 3 : placeholders); p++) {
+    var px = 12 + (kpiShow.length + p) * 136;
+    s += '<rect x="' + px + '" y="66" width="124" height="74" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<rect x="' + (px+8) + '" y="76" width="80" height="8" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="' + (px+8) + '" y="96" width="60" height="20" rx="4" fill="#F3F4F6"/>'
+      + '<rect x="' + (px+8) + '" y="122" width="90" height="10" rx="3" fill="#F3F4F6"/>';
+  }
+
+  var y = 152;
+
+  if (q === 'minimal') {
+    s += '<rect x="12" y="' + y + '" width="396" height="110" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="210" y="' + (y+45) + '" font-size="11" fill="#D1D5DB" text-anchor="middle">Insufficient context to build structured output</text>'
+      + '<text x="210" y="' + (y+63) + '" font-size="10" fill="#D1D5DB" text-anchor="middle">Add Role, Context and Task to get a real dashboard</text>'
+      + '<rect x="30" y="' + (y+78) + '" width="80" height="12" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="124" y="' + (y+78) + '" width="80" height="12" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="218" y="' + (y+78) + '" width="80" height="12" rx="3" fill="#F3F4F6"/>';
+    y += 122;
+    s += '<rect x="12" y="' + y + '" width="396" height="80" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="22" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#9CA3AF">Section</text>'
+      + '<rect x="22" y="' + (y+24) + '" width="356" height="10" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="22" y="' + (y+40) + '" width="280" height="10" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="22" y="' + (y+56) + '" width="320" height="10" rx="3" fill="#F3F4F6"/>';
+    y += 92;
+    s += '<rect x="12" y="' + y + '" width="396" height="66" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="22" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#9CA3AF">Data Table</text>'
+      + '<rect x="22" y="' + (y+28) + '" width="356" height="8" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="22" y="' + (y+42) + '" width="300" height="8" rx="3" fill="#F3F4F6"/>'
+      + '<rect x="22" y="' + (y+56) + '" width="260" height="8" rx="3" fill="#F3F4F6"/>';
+
+  } else if (q === 'partial') {
+    var ct = escapeXML(data.chart_title || 'Performance');
+    s += '<rect x="12" y="' + y + '" width="244" height="130" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="22" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#374151">' + ct + '</text>'
+      + '<text x="22" y="' + (y+29) + '" font-size="8" fill="#9CA3AF">No target reference</text>';
+    [30,35,32,38].forEach(function(bh, b) {
+      var bx = 30 + b * 52;
+      s += '<rect x="' + bx + '" y="' + (y+100-bh) + '" width="34" height="' + bh + '" rx="3" fill="#93C5FD"/>'
+        + '<text x="' + (bx+17) + '" y="' + (y+118) + '" font-size="8" fill="#9CA3AF" text-anchor="middle">Q' + (b+1) + '</text>';
+    });
+    s += '<text x="140" y="' + (y+131) + '" font-size="8" fill="#D1D5DB" text-anchor="middle">No axis labels · No context</text>';
+    var lt = escapeXML(data.list_title || 'Status');
+    var li = Array.isArray(data.list_items) ? data.list_items : [];
+    s += '<rect x="268" y="' + y + '" width="140" height="130" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="278" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#374151">' + lt + '</text>';
+    if (li.length > 0) {
+      li.slice(0,4).forEach(function(it, idx) {
+        s += '<text x="284" y="' + (y+36+idx*22) + '" font-size="9" fill="#6B7280">• ' + escapeXML(it.substring(0,22)) + '</text>';
+      });
+    } else {
+      s += '<text x="338" y="' + (y+70) + '" font-size="9" fill="#D1D5DB" text-anchor="middle">Not specified</text>';
+    }
+    y += 142;
+    s += '<rect x="12" y="' + y + '" width="396" height="66" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="22" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#374151">Data Table</text>'
+      + '<text x="22" y="' + (y+34) + '" font-size="9" fill="#6B7280">Row 1</text><text x="120" y="' + (y+34) + '" font-size="9" fill="#6B7280">Value A</text>'
+      + '<text x="220" y="' + (y+34) + '" font-size="9" fill="#6B7280">Value B</text><text x="320" y="' + (y+34) + '" font-size="9" fill="#6B7280">Value C</text>'
+      + '<text x="22" y="' + (y+50) + '" font-size="9" fill="#6B7280">Row 2</text><text x="120" y="' + (y+50) + '" font-size="9" fill="#6B7280">Value D</text>'
+      + '<text x="220" y="' + (y+50) + '" font-size="9" fill="#6B7280">Value E</text><text x="320" y="' + (y+50) + '" font-size="9" fill="#6B7280">Value F</text>';
+
+  } else { // structured
+    var st = escapeXML(data.chart_title || 'Performance Trend');
+    var sl = escapeXML(subtitle || 'Period comparison');
+    s += '<rect x="12" y="' + y + '" width="244" height="130" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="22" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#374151">' + st + '</text>'
+      + '<text x="22" y="' + (y+29) + '" font-size="8" fill="#9CA3AF">' + sl + '</text>';
+    [30,35,38,42].forEach(function(bh, b) {
+      var bx = 30 + b * 52;
+      var bc = b === 3 ? '#2563EB' : '#93C5FD';
+      s += '<rect x="' + bx + '" y="' + (y+108-bh) + '" width="34" height="' + bh + '" rx="3" fill="' + bc + '"/>'
+        + '<text x="' + (bx+17) + '" y="' + (y+120) + '" font-size="8" fill="#6B7280" text-anchor="middle">Q' + (b+1) + '</text>';
+    });
+    var rItems = Array.isArray(data.list_items) && data.list_items.length > 0
+      ? data.list_items : (data.has_renewals ? ['SLA on track','Savings met','Scope: TBC'] : ['Point 1','Point 2','Point 3']);
+    var rBg = data.has_renewals ? '#F0FDF4' : 'white';
+    var rBd = data.has_renewals ? '#BBF7D0' : '#E5E7EB';
+    var rTt = data.has_renewals ? 'Readiness' : escapeXML(data.list_title || 'Key Points');
+    s += '<rect x="268" y="' + y + '" width="140" height="130" rx="7" fill="' + rBg + '" stroke="' + rBd + '"/>'
+      + '<text x="278" y="' + (y+16) + '" font-size="10" font-weight="700" fill="#065F46">' + rTt + '</text>';
+    rItems.slice(0,4).forEach(function(it, idx) {
+      s += '<circle cx="284" cy="' + (y+32+idx*22) + '" r="5" fill="#22C55E"/>'
+        + '<text x="295" y="' + (y+36+idx*22) + '" font-size="9" fill="#374151">' + escapeXML(it.substring(0,22)) + '</text>';
+    });
+    y += 142;
+    s += '<rect x="12" y="' + y + '" width="396" height="96" rx="7" fill="white" stroke="#E5E7EB"/>'
+      + '<text x="22" y="' + (y+16) + '" font-size="10" font-weight="600" fill="#374151">Next Steps</text>'
+      + '<text x="22" y="' + (y+29) + '" font-size="8" fill="#9CA3AF">Three workstreams for discussion</text>';
+    ['Initiative A','Initiative B','Initiative C'].forEach(function(ws, wi) {
+      var wsx = 20 + wi * 130;
+      var wsc = wi < 2 ? '#EEF2FF' : '#FEF9C3';
+      var wsb = wi < 2 ? '#C7D2FE' : '#FDE68A';
+      s += '<rect x="' + wsx + '" y="' + (y+37) + '" width="118" height="52" rx="6" fill="' + wsc + '" stroke="' + wsb + '"/>'
+        + '<text x="' + (wsx+9) + '" y="' + (y+52) + '" font-size="9" font-weight="700" fill="#4338CA">' + ws + '</text>'
+        + '<text x="' + (wsx+9) + '" y="' + (y+66) + '" font-size="8" fill="#6B7280">Scope TBD</text>'
+        + '<text x="' + (wsx+9) + '" y="' + (y+78) + '" font-size="8" fill="#6B7280">For discussion</text>';
+    });
+  }
+
+  s += '<rect x="0" y="414" width="420" height="38" fill="#F3F4F6" rx="4"/>'
+    + '<text x="16" y="437" font-size="8" fill="#9CA3AF">Generated from your prompt · Genpact Applied AI Studio</text>'
+    + '</svg>';
+  return s;
+}
+
 function dashboardASVG() {
   return `<svg viewBox="0 0 420 356" xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
   <rect width="420" height="356" fill="#F8FAFB"/>
@@ -1038,7 +1190,7 @@ function showScreen(id) {
 }
 
 // ─── OPENAI API ───────────────────────────────────────────────
-var AI_SYSTEM = 'You are evaluating a business prompt written for a QBR dashboard task.\n\nSCENARIO: A Genpact account team needs to build a QBR executive summary dashboard for GlobalBank\'s F&A transformation (Q4 FY2024, $4.2M ARR). The dashboard is for the client CFO and COO reviewing contract renewal and 2025 scope.\n\nEvaluate the prompt on 5 dimensions (0-20 each):\n- role: Did they assign a specific AI expertise/role?\n- context: Did they name audience, stakes, business context?\n- control: Did they add guardrails on what NOT to include?\n- task: Did they specify what exactly to build/which sections?\n- output: Did they describe format, layout, or quality standard?\n\nAlso describe what you would actually produce from this prompt in 3-4 short bullet points (max 80 words total, start each with a bullet •).\n\nIdentify the single highest-impact sentence missing from their prompt.\n\nReturn ONLY valid JSON with no extra text:\n{"scores":{"role":{"score":0,"feedback":"one specific sentence referencing their actual words"},"context":{"score":0,"feedback":"one specific sentence"},"control":{"score":0,"feedback":"one specific sentence"},"task":{"score":0,"feedback":"one specific sentence"},"output":{"score":0,"feedback":"one specific sentence"}},"ai_output":"• bullet one\\n• bullet two\\n• bullet three","gap":{"dimension":"control","sentence":"The exact sentence they should add","impact":15}}';
+var AI_SYSTEM = 'You are evaluating a business prompt for a QBR dashboard task.\n\nSCENARIO: Genpact account team, GlobalBank F&A transformation, Q4 FY2024, $4.2M ARR. Dashboard for client CFO/COO reviewing renewal and 2025 scope.\n\nScore 5 dimensions (0-20 each): role (expertise assigned?), context (audience/stakes named?), control (guardrails added?), task (specific build requested?), output (format/layout described?)\n\nAlso write 3-4 bullet points (start each with •) on what you would actually produce from this prompt (max 80 words). Identify the single highest-impact missing sentence.\n\nGenerate a dashboard JSON reflecting what this SPECIFIC prompt would actually produce — sparse and broken if the prompt is vague or nonsensical, rich and structured if well-framed. Base it strictly on what was asked.\n\nReturn ONLY valid JSON:\n{"scores":{"role":{"score":0,"feedback":"one specific sentence"},"context":{"score":0,"feedback":"..."},"control":{"score":0,"feedback":"..."},"task":{"score":0,"feedback":"..."},"output":{"score":0,"feedback":"..."}},"ai_output":"• line\\n• line\\n• line","gap":{"dimension":"...","sentence":"exact sentence to add","impact":15},"dashboard":{"title":"max 6 words","subtitle":"audience/context max 8 words or empty string","dark_header":true,"kpis":[{"label":"...","value":"...","badge":"...","status":"good|warn|bad|unknown"}],"chart_title":"...","has_renewals":false,"list_items":["..."],"quality":"minimal|partial|structured|executive"}}';
 
 async function callOpenAI(promptText) {
   var resp = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1046,7 +1198,7 @@ async function callOpenAI(promptText) {
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
-      max_tokens: 500,
+      max_tokens: 650,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: AI_SYSTEM },
@@ -1072,6 +1224,7 @@ function startChallenge() {
   state.aiFeedback = null;
   state.aiOutput = '';
   state.gap = null;
+  state.dashboard = null;
 
   document.getElementById('playerTag').textContent = name;
   document.getElementById('dashboardA').innerHTML = dashboardASVG();
@@ -1156,6 +1309,7 @@ async function lockIn() {
     state.aiFeedback = aiData.scores;
     state.aiOutput   = aiData.ai_output || '';
     state.gap        = aiData.gap || null;
+    state.dashboard  = aiData.dashboard || null;
   } else {
     scores = scorePrompt(prompt);
     state.aiFeedback = null;
@@ -1249,7 +1403,21 @@ function renderResults() {
 
   // Side-by-side comparison dashboards
   document.getElementById('dashboardResultA').innerHTML = dashboardASVG();
-  document.getElementById('dashboardB').innerHTML = dashboardBSVG();
+  document.getElementById('dashboardB').innerHTML = renderDynamicDashboard(state.dashboard);
+
+  // Update right panel badge based on quality
+  var q = state.dashboard ? state.dashboard.quality : null;
+  var badge = document.getElementById('yourDashBadge');
+  var badgeLabel = document.getElementById('yourDashLabel');
+  if (badge) {
+    var qLabels = { executive: 'Your prompt — expert level', structured: 'Your prompt — good structure', partial: 'Your prompt — partial', minimal: 'Your prompt — too vague' };
+    var qClass  = { executive: 'after', structured: 'structured', partial: 'partial-badge', minimal: 'before' };
+    badge.textContent = qLabels[q] || 'Your prompt result';
+    badge.className = 'comp-badge ' + (qClass[q] || 'before');
+  }
+  if (badgeLabel && state.dashboard && state.dashboard.title) {
+    badgeLabel.textContent = '"' + state.dashboard.title + '"';
+  }
 
   // Leaderboard
   renderLeaderboard();
@@ -1302,7 +1470,7 @@ function tryAgain() {
   document.getElementById('wordCount').textContent = '0';
   var w = document.getElementById('timerWarning');
   if (w) w.style.display = 'none';
-  state = { name: '', prompt: '', scores: null, total: 0, timerInterval: null, seconds: 180, aiFeedback: null, aiOutput: '', gap: null };
+  state = { name: '', prompt: '', scores: null, total: 0, timerInterval: null, seconds: 180, aiFeedback: null, aiOutput: '', gap: null, dashboard: null };
   showScreen('s-join');
 }
 </script>
