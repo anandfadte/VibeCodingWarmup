@@ -1309,7 +1309,14 @@ async function lockIn() {
     state.aiFeedback = aiData.scores;
     state.aiOutput   = aiData.ai_output || '';
     state.gap        = aiData.gap || null;
-    state.dashboard  = aiData.dashboard || null;
+    // Override AI quality tier using actual total score so dashboard always matches score
+    var dash = aiData.dashboard || null;
+    if (dash) {
+      var total = scores.role + scores.context + scores.control + scores.task + scores.output;
+      var allHigh = scores.role >= 14 && scores.context >= 14 && scores.control >= 14 && scores.task >= 14 && scores.output >= 14;
+      dash.quality = (total >= 85 && allHigh) ? 'executive' : (total >= 55) ? 'structured' : (total >= 25) ? 'partial' : 'minimal';
+    }
+    state.dashboard  = dash;
   } else {
     scores = scorePrompt(prompt);
     state.aiFeedback = null;
