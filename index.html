@@ -887,6 +887,47 @@ function escapeXML(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ─── EXTRACT PROMPT-SPECIFIC LABELS ────────────────────────────
+function extractDashboardLabels(promptText) {
+  var p = promptText.toLowerCase();
+  var kpis = [], listItems = [], chartTitle = 'Performance', title = 'Dashboard', subtitle = '';
+
+  // Title: extract company + period
+  var co = promptText.match(/GlobalBank|Genpact|[A-Z][a-zA-Z]+Bank|[A-Z][A-Z]+/);
+  var period = promptText.match(/Q[1-4]\s*FY\d{2,4}|FY\d{2,4}|Q[1-4]/i);
+  if (co && period) title = co[0] + ' ' + period[0].toUpperCase() + ' Review';
+  else if (co) title = co[0] + ' Review';
+  else if (period) title = period[0].toUpperCase() + ' Dashboard';
+
+  // Subtitle: audience
+  var aud = promptText.match(/\b(CFO|COO|CEO|board|executive)\b/i);
+  if (aud) subtitle = aud[1].toUpperCase() + ' review';
+
+  // KPIs from keywords
+  if (p.match(/\bsla\b|attainment/)) kpis.push({label:'SLA Attainment', value:'—', badge:'review needed', status:'unknown'});
+  if (p.match(/sav|process saving/)) kpis.push({label:'Process Savings', value:'—', badge:'review needed', status:'unknown'});
+  if (p.match(/renew|contract/)) kpis.push({label:'Renewal Status', value:'—', badge:'review needed', status:'unknown'});
+  if (p.match(/revenue|arr\b|financial/)) kpis.push({label:'Revenue', value:'—', badge:'review needed', status:'unknown'});
+  if (p.match(/margin|profit/)) kpis.push({label:'Net Margin', value:'—', badge:'review needed', status:'unknown'});
+  if (p.match(/performance/) && kpis.length === 0) kpis.push({label:'Performance', value:'—', badge:'review needed', status:'unknown'});
+  if (kpis.length === 0) kpis.push({label:'KPI', value:'—', badge:'not specified', status:'unknown'});
+
+  // Chart title
+  if (p.match(/\bsla\b|attainment/)) chartTitle = 'SLA Performance';
+  else if (p.match(/quarter|trend|q1|q2|q3|q4/)) chartTitle = 'Quarterly Trend';
+  else if (p.match(/financial|revenue/)) chartTitle = 'Financial Overview';
+
+  // List items
+  if (p.match(/renew/)) listItems.push('Contract renewal status');
+  if (p.match(/\bsla\b/)) listItems.push('SLA compliance');
+  if (p.match(/sav|process/)) listItems.push('Process savings summary');
+  if (p.match(/scope|expand/)) listItems.push('2025 scope expansion');
+  if (p.match(/risk|escalat/)) listItems.push('Risk & escalations');
+  if (listItems.length === 0) listItems.push('No specific items mentioned');
+
+  return { title: title, subtitle: subtitle, kpis: kpis.slice(0,3), chart_title: chartTitle, list_items: listItems };
+}
+
 // ─── DYNAMIC DASHBOARD RENDERER ───────────────────────────────
 function renderDynamicDashboard(data) {
   if (!data) return dashboardBSVG();
@@ -1333,6 +1374,13 @@ async function lockIn() {
   var qualityTier = (total >= 85 && allHigh) ? 'executive' : (total >= 55) ? 'structured' : (total >= 25) ? 'partial' : 'minimal';
   if (!state.dashboard) state.dashboard = {};
   state.dashboard.quality = qualityTier;
+  // Fill missing fields from prompt keywords so dashboard always reflects the specific prompt
+  var extracted = extractDashboardLabels(prompt);
+  if (!state.dashboard.title)      state.dashboard.title      = extracted.title;
+  if (!state.dashboard.subtitle)   state.dashboard.subtitle   = extracted.subtitle;
+  if (!state.dashboard.chart_title) state.dashboard.chart_title = extracted.chart_title;
+  if (!Array.isArray(state.dashboard.kpis) || state.dashboard.kpis.length === 0)       state.dashboard.kpis       = extracted.kpis;
+  if (!Array.isArray(state.dashboard.list_items) || state.dashboard.list_items.length === 0) state.dashboard.list_items = extracted.list_items;
 
   // Save to leaderboard (replace any prior entry for this name)
   var entries = storeLoad().filter(function(e) { return e.name !== state.name; });
