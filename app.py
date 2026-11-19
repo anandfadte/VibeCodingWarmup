@@ -286,6 +286,30 @@ def show_input():
 </div>
 """, unsafe_allow_html=True)
 
+    st.markdown("""
+<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:16px 20px;margin:0 0 18px;">
+  <div style="font-size:11px;color:#0369a1;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
+    THE SITUATION
+  </div>
+  <p style="color:#0f172a;font-size:14px;margin:0 0 6px;line-height:1.6;">
+    You are on the <strong>Genpact account team</strong> managing GlobalBank's Finance &amp; Accounting transformation —
+    a 3-year contract, $4.2M ARR. Tomorrow morning's QBR covers <strong>Q4 FY2024 performance,
+    the renewal decision, and 2025 scope expansion.</strong>
+  </p>
+  <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">
+    Your team lead used a 4-word AI prompt to build the dashboard. It produced something generic.
+    <strong>Write a better one.</strong> Use the 5 dimensions below as your guide — the AI will score your prompt instantly.
+  </p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+  <span style="background:#ede9fe;color:#5b21b6;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">R — Role</span>
+  <span style="background:#dbeafe;color:#1e40af;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">C — Context</span>
+  <span style="background:#fce7f3;color:#9d174d;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">C — Control</span>
+  <span style="background:#fef3c7;color:#92400e;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">T — Task</span>
+  <span style="background:#dcfce7;color:#166534;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">O — Output</span>
+</div>
+""", unsafe_allow_html=True)
+
     with st.form("input_form"):
         name   = st.text_input("Your name", placeholder="Enter your name")
         prompt = st.text_area("Your prompt",
