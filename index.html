@@ -533,6 +533,18 @@ body {
 .hiw-step { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--fg); }
 .hiw-num { width: 22px; height: 22px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
+/* ─── DASHBOARD COMPARISON ───────────────────────────────────── */
+.comparison-grid { display: grid; grid-template-columns: 1fr 48px 1fr; gap: 0; align-items: start; }
+.comparison-col { display: flex; flex-direction: column; gap: 10px; }
+.comp-col-header { display: flex; flex-direction: column; gap: 6px; padding-bottom: 4px; }
+.comp-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; align-self: flex-start; }
+.comp-badge.before { background: #FEE2E2; color: #991B1B; }
+.comp-badge.after { background: #D1FAE5; color: #065F46; }
+.comp-col-quote { font-size: 13px; color: var(--muted); font-style: italic; }
+.comp-divider { display: flex; align-items: flex-start; justify-content: center; padding-top: 48px; font-size: 24px; color: var(--muted); }
+.expert-prompt-reveal { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px; }
+.expert-prompt-reveal .expert-desc { margin-bottom: 12px; }
+
 /* ─── RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width: 860px) {
   .challenge-grid { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
@@ -711,28 +723,51 @@ body {
       <div id="gapContent"></div>
     </div>
 
-    <!-- Expert comparison -->
+    <!-- Dashboard comparison -->
     <div class="expert-section">
-      <div class="section-label">What a fully framed prompt looks like</div>
-      <p class="expert-desc">Every element addressed. Same scenario. Same AI.</p>
+      <div class="section-label">The difference framing makes</div>
 
-      <div class="expert-prompt-text">
-        <span class="ep-role">You are a senior Genpact account analyst with expertise in F&amp;A transformation delivery reporting.</span>
-        <span class="ep-ctx"> Build a QBR executive summary dashboard for GlobalBank's Q4 FY2024 review. The audience is the client CFO and COO — they are evaluating contract renewal and 2025 scope expansion. They need to see: SLA attainment against contract thresholds, process savings delivered vs. committed, renewal readiness, and three 2025 scope expansion opportunities.</span>
-        <span class="ep-task"> Structure the dashboard with four sections: a headline KPI row (SLA attainment, process savings, renewal status), a Q1–Q4 SLA performance trend, a renewal readiness checklist with RAG indicators, and a 2025 scope discussion panel with three workstreams.</span>
-        <span class="ep-out"> The layout must be scannable in under 90 seconds and professional enough to share directly with a CFO.</span>
-        <span class="ep-ctrl"> Exclude all internal Genpact operational metrics the client should not see. No raw data tables. Maximum three chart types.</span>
-      </div>
-      <div class="ep-key-row">
-        <span class="ep-key epk-role">R &nbsp;Role</span>
-        <span class="ep-key epk-ctx">C &nbsp;Context</span>
-        <span class="ep-key epk-task">T &nbsp;Task</span>
-        <span class="ep-key epk-out">O &nbsp;Output</span>
-        <span class="ep-key epk-ctrl">C &nbsp;Control</span>
+      <div class="comparison-grid">
+        <!-- Left: quick prompt result -->
+        <div class="comparison-col">
+          <div class="comp-col-header">
+            <div class="comp-badge before">4-word prompt</div>
+            <div class="comp-col-quote">"Build me a QBR dashboard."</div>
+          </div>
+          <div class="dashboard-frame" id="dashboardResultA"></div>
+        </div>
+
+        <!-- Arrow divider -->
+        <div class="comp-divider">→</div>
+
+        <!-- Right: expert prompt result -->
+        <div class="comparison-col">
+          <div class="comp-col-header">
+            <div class="comp-badge after">All 5 elements (RCTO+C)</div>
+            <div class="comp-col-quote">Role · Context · Task · Output · Control</div>
+          </div>
+          <div class="dashboard-frame" id="dashboardB"></div>
+        </div>
       </div>
 
-      <div class="dashboard-b-label">What it produced ↓</div>
-      <div class="dashboard-frame" id="dashboardB"></div>
+      <!-- Expert prompt text below -->
+      <div class="expert-prompt-reveal">
+        <p class="expert-desc">What the fully framed prompt said:</p>
+        <div class="expert-prompt-text">
+          <span class="ep-role">You are a senior Genpact account analyst with expertise in F&amp;A transformation delivery reporting.</span>
+          <span class="ep-ctx"> Build a QBR executive summary dashboard for GlobalBank's Q4 FY2024 review. The audience is the client CFO and COO — they are evaluating contract renewal and 2025 scope expansion. They need to see: SLA attainment against contract thresholds, process savings delivered vs. committed, renewal readiness, and three 2025 scope expansion opportunities.</span>
+          <span class="ep-task"> Structure the dashboard with four sections: a headline KPI row (SLA attainment, process savings, renewal status), a Q1–Q4 SLA performance trend, a renewal readiness checklist with RAG indicators, and a 2025 scope discussion panel with three workstreams.</span>
+          <span class="ep-out"> The layout must be scannable in under 90 seconds and professional enough to share directly with a CFO.</span>
+          <span class="ep-ctrl"> Exclude all internal Genpact operational metrics the client should not see. No raw data tables. Maximum three chart types.</span>
+        </div>
+        <div class="ep-key-row">
+          <span class="ep-key epk-role">R &nbsp;Role</span>
+          <span class="ep-key epk-ctx">C &nbsp;Context</span>
+          <span class="ep-key epk-task">T &nbsp;Task</span>
+          <span class="ep-key epk-out">O &nbsp;Output</span>
+          <span class="ep-key epk-ctrl">C &nbsp;Control</span>
+        </div>
+      </div>
     </div>
 
     <!-- Leaderboard -->
@@ -1212,7 +1247,8 @@ function renderResults() {
     gapSection.style.display = 'none';
   }
 
-  // Expert dashboard
+  // Side-by-side comparison dashboards
+  document.getElementById('dashboardResultA').innerHTML = dashboardASVG();
   document.getElementById('dashboardB').innerHTML = dashboardBSVG();
 
   // Leaderboard
